@@ -1,7 +1,7 @@
 // Lapisan akses data (hanya glue ke sdk/db). Seluruh logika bot bergantung pada
 // antarmuka ini, sehingga bisa diganti repo palsu di tes (test/helpers).
 import { db } from 'sdk';
-import { and, eq, like, asc } from 'sdk/db';
+import { and, eq, like, asc, desc } from 'sdk/db';
 import * as T from '../schema.js';
 
 
@@ -83,4 +83,28 @@ export async function resetAll(uid) {
   for (const t of [T.settings, T.cycleHistory, T.symptoms, T.bbt, T.wellbeing, T.kb, T.lh, T.pregtest, T.conversations]) {
     await db.delete(t).where(byUser(t, uid)).run();
   }
+}
+
+// ───────────── diagnosis ─────────────
+const KEEP_EVENTS = 500;
+export async function logEvent({ kind, source, label = null, userId = null, detail = null }) {
+  const [row] = await db.insert(T.diagEvents).values({ kind, source, label, userId, detail }).returning().run();
+  await db.run(`DELETE FROM diag_events WHERE id <= (SELECT MAX(id) FROM diag_events) - ${KEEP_EVENTS}`);
+  return row?.id ?? null;
+}
+export const recentEvents = (kind, limit = 10) =>
+  db.select().from(T.diagEvents).where(eq(T.diagEvents.kind, kind)).orderBy(desc(T.diagEvents.id)).limit(limit).all();
+export async function getEvent(id) {
+  return (await db.select().from(T.diagEvents).where(eq(T.diagEvents.id, id)).get()) ?? null;
+}
+export async function tableCounts() {
+  const out = {};
+  for (const [k, t] of Object.entries({ users: T.settings, cycles: T.cycleHistory, symptoms: T.symptoms, bbt: T.bbt, wellbeing: T.wellbeing, lh: T.lh, kb: T.kb, preg: T.pregtest })) out[k] = await db.$count(t);
+  return out;
+}
+/** Semua baris untuk audit agregat (hanya dipakai /diag; tak pernah ditampilkan mentah). */
+export async function allForAudit() {
+  const [settings, history, symptoms, bbt, wellbeing, lh, kb, preg] = await Promise.all(
+    [T.settings, T.cycleHistory, T.symptoms, T.bbt, T.wellbeing, T.lh, T.kb, T.pregtest].map((t) => db.select().from(t).all()));
+  return { settings, history, symptoms, bbt, wellbeing, lh, kb, preg };
 }

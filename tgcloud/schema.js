@@ -84,3 +84,14 @@ export const conversations = table('conversations', {
   state: json('state'),
   updatedAt: ts(),
 });
+
+/** Log diagnosis: error terstruktur & jejak sapuan reminder (lihat docs/DIAGNOSA.md). */
+export const diagEvents = table('diag_events', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  ts: integer('ts', { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  kind: text('kind').notNull(), // 'error' | 'cron'
+  source: text('source').notNull(),
+  label: text('label'),
+  userId: integer('user_id'),
+  detail: json('detail'),
+}, (t) => ({ idx: index('idx_diag_kind').on(t.kind, t.id) }));

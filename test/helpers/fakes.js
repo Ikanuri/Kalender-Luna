@@ -1,4 +1,5 @@
 // Repo & API palsu in-memory untuk menguji alur bot end-to-end.
+const NOW_FAKE = Date.UTC(2026, 9, 20, 3, 0);
 export function fakeRepo() {
   const db = { settings: new Map(), history: [], symptoms: [], bbt: [], wellbeing: [], lh: [], kb: [], preg: [], conv: new Map() };
   const sortD = (a) => [...a].sort((x, y) => (x.date < y.date ? -1 : 1));
@@ -38,6 +39,11 @@ export function fakeRepo() {
     getConv: async (uid) => db.conv.get(uid) ?? null,
     setConv: async (uid, s) => db.conv.set(uid, s),
     clearConv: async (uid) => db.conv.delete(uid),
+    logEvent: async (e) => { db.events ??= []; const row = { id: db.events.length + 1, ts: new Date(NOW_FAKE), detail: null, label: null, userId: null, ...e }; db.events.push(row); return row.id; },
+    recentEvents: async (kind, n = 10) => (db.events ?? []).filter((e) => e.kind === kind).slice(-n).reverse(),
+    getEvent: async (id) => (db.events ?? []).find((e) => e.id === id) ?? null,
+    tableCounts: async () => ({ users: db.settings.size, cycles: db.history.length, symptoms: db.symptoms.length, bbt: db.bbt.length, wellbeing: db.wellbeing.length, lh: db.lh.length, kb: db.kb.length, preg: db.preg.length }),
+    allForAudit: async () => ({ settings: [...db.settings.values()], history: db.history, symptoms: db.symptoms, bbt: db.bbt, wellbeing: db.wellbeing, lh: db.lh, kb: db.kb, preg: db.preg }),
     resetAll: async (uid) => {
       db.settings.delete(uid); db.conv.delete(uid);
       for (const k of ['history', 'symptoms', 'bbt', 'wellbeing', 'lh', 'kb', 'preg']) db[k] = db[k].filter((r) => r.userId !== uid);

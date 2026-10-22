@@ -4,6 +4,7 @@
 Semua fitur PRD §5–§21 di sisi bot. Lihat `docs/CHANGELOG.md`.
 
 ## Berikutnya
+0. Isi secret `TGCLOUD_TOKEN` di GitHub, merge ke `main` → deploy otomatis (lihat `docs/DIAGNOSA.md`).
 1. **Deploy & validasi nyata** (butuh token bot + CLI): `npm create @tgcloud/bot`-style `tgcloud login`, `push`, `migrate`; coba `tgcloud run handlers/message` dengan payload contoh.
 2. **Validasi Jalur A** (PRD §14.1): uji `<tg-button>` di dalam `<td>`; bila jalan, set `clickableCells: true` di `lib/config.js`.
 3. **Pemicu reminder harian** (lihat ARSITEKTUR): isi `adminIds` dan jadwalkan `/_cron`.

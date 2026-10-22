@@ -58,3 +58,9 @@ key (dilarang runtime); `resetAll` menghapus semua tabel per `user_id`.
 `/start /bantuan /kalender /status /haid /gejala /suhu /lh /tes /kb /wellbeing /analisis
 /laporan /bagikan /atur /reset /lewati` + `/_cron` (admin). Callback: `cal:`, `cal-month:`,
 `ob:`, `log:`, `sym:`, `reset:`, `noop`.
+
+## CI/CD & diagnosis
+
+- `.github/workflows/ci-cd.yml`: `npm test` → (main) `tgcloud push` → `migrate --safe` → smoke `endpoints/health`.
+- `.github/workflows/monitor.yml`: health check tiap 6 jam.
+- Error handling: `bot.js` membungkus `handleMessage`/`handleCallback` dengan `guarded()` → `diag.recordError` → tabel `diag_events`. Detail di `docs/DIAGNOSA.md`.

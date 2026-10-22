@@ -14,6 +14,7 @@ import { onboardingStep, startOnboarding } from './onboarding.js';
 import { initialPrompt, startSymptomFlow, symptomStep } from './symptom-flow.js';
 import { runReminders } from './reminder-runner.js';
 import { esc } from './html.js';
+import { callbackLabel, diagAudit, diagErrorDetail, diagSelfTest, diagSummary, recordError } from './diag.js';
 import defaultConfig from './config.js';
 
 const HELP = `<b>Luna — perintah</b>
@@ -285,6 +286,21 @@ export function createBot({ api, repo, config = defaultConfig, now = () => Date.
       return html(chat, 'Tidak ada yang bisa dilewati.');
     },
 
+    async diag({ uid, chat, args, from }) {
+      if (!config.adminIds.includes(from.id)) return;
+      const s = await repo.getSettings(uid);
+      const today = todayFor(s);
+      const [sub, arg] = args;
+      if (sub === 'audit') return html(chat, await diagAudit(repo, today));
+      if (sub === 'self') return html(chat, diagSelfTest());
+      if (sub === 'error' && arg) return html(chat, await diagErrorDetail(repo, Number(arg)));
+      if (sub === 'errors') {
+        const rows = await repo.recentEvents('error', 10);
+        return html(chat, rows.length ? rows.map((e) => `#${e.id} ${esc(e.label)} · ${esc(e.detail?.message ?? '')}`).join('\n') : 'Tidak ada error tercatat.');
+      }
+      return html(chat, await diagSummary(repo, { today, nowMs: now() }));
+    },
+
     async _cron({ from, chat }) {
       if (!config.adminIds.includes(from.id)) return;
       const r = await runReminders({ api, repo, nowMs: now(), defaultTz: config.defaultTzOffset });
@@ -338,7 +354,27 @@ export function createBot({ api, repo, config = defaultConfig, now = () => Date.
   }
 
   // ───────────── entry points ─────────────
-  async function handleMessage(message) {
+  /** Tangkap error tak terduga: catat (tanpa isi pesan pengguna), beri tahu pengguna & admin. */
+  async function guarded(source, label, uid, chat, fn) {
+    try {
+      return await fn();
+    } catch (err) {
+      const id = await recordError(repo, { source, label, userId: uid }, err);
+      if (chat) await html(chat, `⚠️ Maaf, terjadi kesalahan${id ? ` (kode #${id})` : ''}. Coba lagi sebentar lagi.`).catch(() => {});
+      for (const admin of config.adminIds) {
+        if (admin !== uid) await html(admin, `🚨 Error${id ? ` #${id}` : ''} di ${esc(label)}: ${esc(String(err?.message ?? err).slice(0, 150))}\n/diag error ${id ?? ''}`).catch(() => {});
+      }
+    }
+  }
+
+  const handleMessage = (message) => {
+    const c = parseCommand(message?.text);
+    return guarded('message', c ? `/${c.cmd}` : 'text', message?.from?.id, message?.chat?.id, () => handleMessageInner(message));
+  };
+  const handleCallback = (cbq) =>
+    guarded('callback', callbackLabel(cbq?.data), cbq?.from?.id, cbq?.message?.chat?.id, () => handleCallbackInner(cbq));
+
+  async function handleMessageInner(message) {
     if (!message?.text || !message.from) return;
     const chat = message.chat.id;
     if (message.chat.type !== 'private') return html(chat, 'Luna hanya bekerja di chat pribadi demi privasi datamu. Buka chat langsung dengan bot ini.');
@@ -356,7 +392,7 @@ export function createBot({ api, repo, config = defaultConfig, now = () => Date.
     return html(chat, 'Ketik /bantuan untuk daftar perintah.');
   }
 
-  async function handleCallback(cb) {
+  async function handleCallbackInner(cb) {
     const data = cb.data ?? '';
     const msg = cb.message;
     const uid = cb.from.id;

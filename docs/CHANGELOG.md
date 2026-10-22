@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0] - 2026-10-22
+### Ditambahkan
+- GitHub Actions: `ci-cd.yml` (tes di setiap push/PR; deploy otomatis dari `main`: `tgcloud push` → `migrate --safe` → smoke test) dan `monitor.yml` (health check terjadwal tiap 6 jam).
+- Diagnosis: `/diag` (admin: ringkasan, `errors`, `error <id>`, `audit`, `self`), penangkap error terpusat dengan kode `#id` + notifikasi admin, tabel `diag_events`, `endpoints/health`, self-test fixture emas (`lib/selftest.js`), audit integritas data (`lib/audit.js`), `docs/DIAGNOSA.md`.
+- Tes struktur (aturan platform tgcloud & arsitektur) dan tes diagnosis; total 37 tes.
+- Skema: tabel baru `diag_events` (aditif, aman untuk `migrate --safe`).
+
 ## [0.1.0] - 2026-10-22
 ### Ditambahkan
 - Logika inti PRD §5–§13, §15–§19 sebagai modul murni di `tgcloud/lib/` (siklus, LH, BBT 3-over-6, statistik, anomali, luteal, PMS, korelasi, perbandingan, kehamilan/DPO, laporan dokter, insight, reminder, berbagi).

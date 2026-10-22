@@ -1,0 +1,68 @@
+name: CI/CD
+
+# Test di setiap push & PR. Deploy ke tgcloud otomatis HANYA dari main
+# (atau manual lewat "Run workflow"). Butuh secret repo: TGCLOUD_TOKEN.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Tes (logika, alur bot, audit, struktur)
+        run: npm test
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Satu deploy pada satu waktu; jangan batalkan deploy yang sedang jalan.
+    concurrency:
+      group: tgcloud-deploy
+      cancel-in-progress: false
+    env:
+      TGCLOUD_TOKEN: ${{ secrets.TGCLOUD_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Pastikan secret TGCLOUD_TOKEN ada
+        run: |
+          if [ -z "$TGCLOUD_TOKEN" ]; then
+            echo "::error::Secret TGCLOUD_TOKEN belum diisi (Settings → Secrets and variables → Actions)."
+            exit 1
+          fi
+
+      - name: Perubahan yang akan dideploy
+        run: npx tgcloud status
+
+      - name: Push kode
+        run: npx tgcloud push
+
+      # --safe: hanya perubahan aditif (tabel/kolom/indeks baru) diterapkan otomatis.
+      # Drop, tipe kolom, dll. sengaja dilewati → jalankan `tgcloud migrate` manual.
+      - name: Migrasi database (hanya yang aman)
+        run: npx tgcloud migrate --safe
+
+      - name: Smoke test di platform (self-test + koneksi DB)
+        run: |
+          npx tgcloud run endpoints/health '{}' --ctx '{ initData: { user: { id: 1 } } }' | tee health.out
+          grep -Eq '"?ok"?[: ]+true' health.out || { echo "::error::Health check gagal setelah deploy"; exit 1; }

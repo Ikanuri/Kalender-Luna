@@ -24,5 +24,7 @@ export async function runReminders({ api, repo, nowMs = Date.now(), defaultTz = 
       console.warn('reminder gagal', s.userId, e?.description ?? e?.message ?? e);
     }
   }
-  return { users: users.length, sent, failed };
+  const result = { users: users.length, sent, failed };
+  await repo.logEvent?.({ kind: 'cron', source: 'reminders', detail: result }).catch(() => {});
+  return result;
 }
