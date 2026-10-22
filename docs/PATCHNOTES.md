@@ -1,5 +1,11 @@
 # Patch Notes
 
+## [0.4.0] - 2026-10-22
+Kalender sekarang berupa tombol langsung di badan chat (bukan keyboard di bawah): merah=haid, hijau=masa subur, biru ⭐=ovulasi, 🟣=luteal.
+
+## [0.3.1] - 2026-10-22
+Perbaikan deploy otomatis saat CLI tgcloud crash setelah upload.
+
 ## [0.3.0] - 2026-10-22
 Kalender kini berupa tombol berwarna langsung di chat: merah untuk haid, hijau untuk masa subur, biru ⭐ untuk ovulasi, 🟣 untuk luteal. Ketuk tanggal untuk detail, panah untuk ganti bulan.
 
