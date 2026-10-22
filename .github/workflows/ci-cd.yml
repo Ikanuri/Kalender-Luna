@@ -51,6 +51,12 @@ jobs:
             exit 1
           fi
 
+      # Runner selalu mulai tanpa snapshot lokal (.tgcloud/ di-gitignore), sehingga
+      # `push` menolak menimpa bot yang sudah berisi modul. `fetch` mencatat revisi
+      # cloud terbaru → pengecekan konflik tetap berlaku, tanpa --force.
+      - name: Sinkronkan revisi cloud
+        run: npx tgcloud fetch
+
       - name: Perubahan yang akan dideploy
         run: npx tgcloud status
 

@@ -1,5 +1,8 @@
 # Patch Notes
 
+## [0.2.1] - 2026-10-22
+Perbaikan deploy otomatis: deploy kedua dan seterusnya dari GitHub sekarang berjalan.
+
 ## [0.2.0] - 2026-10-22
 Deploy otomatis dari GitHub dan alat diagnosis: bila terjadi error, pengguna melihat kode kesalahan dan admin langsung mendapat notifikasi; admin bisa memeriksa kesehatan bot lewat `/diag`.
 

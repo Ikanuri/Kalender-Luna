@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.1] - 2026-10-22
+### Diperbaiki
+- Deploy CI gagal pada run kedua ("never synced with it"): ditambah `tgcloud fetch` sebelum `push` di `ci-cd.yml`.
+
 ## [0.2.0] - 2026-10-22
 ### Ditambahkan
 - GitHub Actions: `ci-cd.yml` (tes di setiap push/PR; deploy otomatis dari `main`: `tgcloud push` → `migrate --safe` → smoke test) dan `monitor.yml` (health check terjadwal tiap 6 jam).
