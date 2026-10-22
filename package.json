@@ -1,0 +1,13 @@
+{
+  "name": "luna-telegram",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Luna Telegram — bot & Mini App kalender siklus di atas Telegram Serverless",
+  "scripts": {
+    "test": "node --test",
+    "deploy": "tgcloud push",
+    "status": "tgcloud status"
+  },
+  "devDependencies": {}
+}
