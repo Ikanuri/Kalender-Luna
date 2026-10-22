@@ -2,7 +2,7 @@
 
 Mini App + bot Telegram untuk pelacakan siklus menstruasi & kesuburan,
 dibangun di atas [Telegram Serverless](https://core.telegram.org/bots/serverless)
-(`tgcloud`). Saudara terpisah dari `luna-kalender-siklus` ((repo `html5-project`; versi
+(`tgcloud`). Saudara terpisah dari `luna-kalender-siklus` (repo `html5-project`; versi
 single-file HTML5 client-only) — bukan migrasi atau pengganti.
 
 ## Status
