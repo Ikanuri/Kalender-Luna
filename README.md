@@ -7,7 +7,7 @@ single-file HTML5 client-only) — bukan migrasi atau pengganti.
 
 ## Status
 
-**Perencanaan — belum ada implementasi.** Lihat `PRD.md` untuk logika
+**v0.1.0 — logika & bot terimplementasi, teruji lokal (`npm test`); belum di-deploy ke tgcloud.** Lihat `PRD.md` untuk logika
 produk lengkap (perhitungan fase siklus, deteksi ovulasi, analisis,
 reminder, Mode Berbagi, dst). Lihat `CLAUDE.md` untuk konteks kerja,
 termasuk kenapa proyek ini sengaja menyimpang dari konvensi "single-file,
@@ -16,4 +16,5 @@ tanpa build step" yang dipakai proyek lain di monorepo `html5-project`.
 ## Dokumentasi
 
 - `PRD.md` — spesifikasi logika produk lengkap, mulai dari sini.
+- `docs/` — ARSITEKTUR, CHANGELOG, PATCHNOTES, HANDOFF, PLAN.
 - `CLAUDE.md` — konteks & batas kerja untuk sesi AI di repo ini.

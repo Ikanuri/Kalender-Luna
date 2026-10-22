@@ -7,10 +7,10 @@ Ini adalah **saudara terpisah** dari `luna-kalender-siklus` (proyek lain,
 versi single-file HTML5 client-only, tanpa server, hidup di repo
 `html5-project`) — bukan penggantinya, dan bukan hasil migrasi.
 
-**Status saat ini: PERENCANAAN. Belum ada satu baris kode implementasi.**
+**Status saat ini: v0.1.0 — logika PRD & bot terimplementasi dan teruji lokal (`npm test`); belum di-deploy ke tgcloud. Lihat `docs/HANDOFF.md`.**
 Baca `PRD.md` di root repo dulu — itu satu-satunya sumber kebenaran untuk
 logika produk (perhitungan fase siklus, deteksi ovulasi, analisis, reminder,
-kalender di chat, dst). Jangan mulai coding tanpa baca PRD.md lengkap dulu,
+kalender di chat, dst). Jangan ubah logika tanpa baca PRD.md lengkap dulu,
 termasuk §2 (struktur folder) dan §14 (kalender rich HTML di chat).
 
 **Repo berdiri sendiri — bukan bagian dari monorepo `html5-project`.**
@@ -80,19 +80,15 @@ reproduksi yang sensitif:
   bug-nya dan kenapa, karena algoritmanya di-port ke proyek ini. Baca
   bagian itu sebelum menulis ulang `detectLHSurge`, perbandingan mood
   netral, atau `detectBBTOvulation` dari nol.
-- **Scheduling/reminder (PRD.md §18) punya ketergantungan teknis yang
-  belum terkonfirmasi**: belum jelas apakah `tgcloud` punya mekanisme
-  cron/time-based trigger bawaan (dokumentasi yang tersedia saat ini cuma
-  menyebut `handlers/` yang event-driven dari update Telegram, dan
-  `endpoints/` yang dipanggil dari Mini App). Ini harus dikonfirmasi dulu
-  sebelum desain teknis reminder dimulai — jangan asumsikan ada cron tanpa
-  verifikasi ke dokumentasi `tgcloud` terbaru.
-- Dokumentasi wajib lengkap (ARSITEKTUR.md/DOKUMENTASI-TEKNIS.md,
-  CHANGELOG.md, PATCHNOTES.md, HANDOFF.md, PLAN.md — sesuai Aturan Wajib #3
-  root `html5-project`) belum dibuat karena belum ada implementasi — lengkapi begitu
-  development dimulai. `PRD.md` saat ini berperan sebagian sebagai
-  `ARSITEKTUR.md` (logika) dan sebagian `PLAN.md` (fitur yang akan
-  dibangun), akan dipecah jadi dokumen-dokumen terpisah begitu kode mulai
-  ditulis.
+- **Scheduling/reminder (PRD.md §18)**: sudah dikonfirmasi (2026-10-22) bahwa
+  dokumentasi `tgcloud` tidak punya cron bawaan. Penyapu reminder dipicu
+  eksternal lewat `/_cron` (admin) — lihat `docs/ARSITEKTUR.md`. Cek ulang
+  dokumentasi `tgcloud` bila ingin mengganti mekanisme ini.
+- **Arsitektur & dokumentasi wajib** ada di `docs/` (ARSITEKTUR, CHANGELOG,
+  PATCHNOTES, HANDOFF, PLAN; sesuai Aturan Wajib #3 root `html5-project`).
+  Perbarui CHANGELOG/PATCHNOTES (SemVer) dan HANDOFF setiap ada perubahan.
+- Modul di `tgcloud/lib/` harus tetap murni (tanpa `import 'sdk'`) kecuali
+  `repo.js`, `bot.js` menerima `api`/`repo` lewat parameter — supaya `npm test`
+  tetap bisa menguji semuanya tanpa platform.
 - Pendaftaran proyek di landing page `index.html` milik `html5-project`
   tidak relevan di repo ini.

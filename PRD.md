@@ -1,6 +1,6 @@
 # PRD — Luna Telegram (Mini App Kalender Siklus di atas Telegram Serverless)
 
-Status: **perencanaan — belum ada implementasi.** Dokumen ini adalah satu-
+Status: **v0.1.0 — logika inti & bot terimplementasi (lihat `docs/`).** Dokumen ini adalah satu-
 satunya sumber kebenaran untuk logika produk sebelum kode ditulis. Semua
 algoritma di sini di-port dari aplikasi kakaknya, `apps/luna-kalender-siklus`
 di repo `html5-project` (single-file HTML5, lihat `docs/ARSITEKTUR.md` di
@@ -577,7 +577,7 @@ yang jauh lebih terbatas):
 | Tabel HTML sungguhan di dalam pesan chat | ✅ Didukung — `<table>` jadi blok tabel asli, sel (`RichBlockTableCell`) punya teks, header, `colspan`/`rowspan`, perataan horizontal/vertikal, serta flag tabel `bordered`/`striped`/`compact` + caption. Maks **20 kolom** per tabel. | Kalender bulanan (7 kolom hari) muat nyaman. |
 | **Warna** per sel sesuai fase | ❌ **Tidak didukung.** Tidak ada atribut warna/background apa pun yang terdokumentasi untuk sel atau baris tabel — satu-satunya kata "colors" di seluruh dokumentasi format ini soal warna tombol yang ikut tema aplikasi Telegram, bukan sesuatu yang bisa kita atur. | "Berwarna" dicapai lewat **emoji berwarna** di dalam teks sel (lihat §14.2), bukan CSS/atribut warna — ini bukan kompromi kosmetik kecil, ini satu-satunya cara yang benar-benar tersedia. |
 | Sel tabel **bisa diklik** langsung | ⚠️ **Belum terkonfirmasi penuh.** Dokumentasi bilang "Table cells can contain only inline formatting", dan tombol (`<tg-button>`, lewat tipe `RichTextButton`) adalah bagian dari sistem `RichText` yang sama — jadi secara skema MUNGKIN bisa, tapi tidak ada contoh eksplisit "tombol di dalam sel tabel" di dokumentasi yang terbaca. **WAJIB divalidasi lewat `tgcloud run` di awal implementasi** sebelum desain final sel-per-sel diandalkan. | Kalau ternyata TIDAK bisa: fallback ke Inline Keyboard terpisah (lihat §14.3) — ini yang dipakai hampir semua bot kalender Telegram yang sudah ada, dan dijamin berfungsi. |
-| Update kalender in-place (ganti bulan tanpa kirim pesan baru) | ❌ **Tidak ada method edit untuk rich message** yang terdokumentasi (beda dari `editMessageText` di pesan klasik). Yang ada `sendRichMessageDraft` — itu preview SEMENTARA 30 detik sebelum di-"commit" lewat `sendRichMessage`, bukan mekanisme edit pesan yang sudah terkirim. | Navigasi bulan (§14.4) mengirim **pesan baru** tiap kali, bukan edit pesan lama. Chat history terisi tiap kali pindah bulan — ini trade-off yang diterima sadar, bukan bug. |
+| Update kalender in-place (ganti bulan tanpa kirim pesan baru) | ✅ **Didukung** — *koreksi 2026-10-22:* dokumentasi `editMessageText` menyatakan "edit text, rich and game messages" dan menerima parameter `rich_message`. (Klaim awal PRD bahwa edit tidak ada keliru.) | Navigasi bulan & detail tanggal **mengedit pesan yang sama**; bila edit gagal, fallback ke pesan baru. |
 
 ### 14.2 Pemetaan fase → emoji warna
 
@@ -620,9 +620,9 @@ Tiap sel berisi: <angka hari><emoji fase>[·]   (lihat §14.2)
 
 Dua tombol di baris terpisah (Inline Keyboard, bukan bagian tabel):
 `‹ Bulan Sebelumnya` dan `Bulan Berikutnya ›`, `callback_data` berisi bulan
-target (`cal-month:<YYYY-MM>`). Menekan salah satu **mengirim pesan
-kalender baru** untuk bulan itu (lihat batasan §14.1 — tidak ada edit
-in-place untuk rich message).
+target (`cal-month:<YYYY-MM>`). Menekan salah satu **mengedit pesan
+kalender di tempat** (`editMessageText` + `rich_message`, lihat §14.1);
+fallback ke pesan baru bila edit gagal.
 
 ### 14.5 Detail per tanggal (aksi utama saat sel/tombol diklik)
 
@@ -678,7 +678,7 @@ datanya ada untuk tanggal itu):
 Belum ada catatan untuk tanggal ini.
 ```
 
-Di bawah pesan detail, Inline Keyboard dengan tombol `📝 Catat Gejala Hari
+Detail tanggal juga dirender sebagai rich message dan mengedit pesan kalender di tempat. Di bawah pesan detail, Inline Keyboard dengan tombol `📝 Catat Gejala Hari
 Ini` (kalau tanggalnya hari ini atau di masa lalu) yang membuka alur input
 gejala (di luar cakupan rinci dokumen ini — ikuti taksonomi §7.1), dan
 tombol `« Kembali ke Kalender` yang mengirim ulang pesan kalender bulan
@@ -824,8 +824,7 @@ FUNGSI tentukanReminderHariIni(user):
 Urutan pengecekan ini penting — hanya **1 reminder per hari** per user,
 kondisi pertama yang cocok yang menang.
 
-**Catatan implementasi (di luar cakupan PRD ini, WAJIB dikonfirmasi sebelum
-desain teknis)**: dokumentasi `tgcloud` yang tersedia saat ini hanya
+**Catatan implementasi — DIKONFIRMASI 2026-10-22:** dokumentasi resmi Telegram Serverless (halaman `bots/serverless`) tidak memuat cron/scheduled trigger; hanya `handlers/` (update Telegram) dan `endpoints/` (Mini App). Karena itu penyapu reminder dipicu eksternal lewat perintah admin `/_cron` (lihat `docs/ARSITEKTUR.md`). Catatan semula: dokumentasi `tgcloud` yang tersedia saat ini hanya
 menjelaskan `handlers/` (reaksi ke update Telegram) dan `endpoints/`
 (dipanggil dari Mini App) — keduanya **event-driven**, bukan time-driven.
 Belum jelas apakah `tgcloud` punya mekanisme cron/scheduled trigger bawaan
