@@ -53,10 +53,14 @@ export function fakeRepo() {
 
 export function fakeApi() {
   const calls = [];
-  const rec = (m) => async (p) => { calls.push({ m, p }); return { message_id: calls.length }; };
+  const failing = new Set();
+  const rec = (m) => async (p) => {
+    if (failing.has(m) && (m !== 'editMessageText' || p.rich_message)) { const e = new Error('rejected'); e.description = 'Bad Request: rich messages not supported'; e.code = 400; throw e; }
+    calls.push({ m, p }); return { message_id: calls.length };
+  };
   return {
-    calls,
-    sendMessage: rec('sendMessage'),
+    calls, failing,
+    sendMessage: rec('sendMessage'), sendRichMessage: rec('sendRichMessage'),
     editMessageText: rec('editMessageText'), answerCallbackQuery: rec('answerCallbackQuery'),
     last: (m) => [...calls].reverse().find((c) => !m || c.m === m)?.p,
   };

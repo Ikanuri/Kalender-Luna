@@ -43,36 +43,58 @@ test('onboarding: validasi, kembali, dan lewati tanpa menyimpan settings siklus'
   await t.say('/status'); assert.match(t.api.last('sendMessage').text, /belum lengkap/);
 });
 
-test('/kalender: grid tombol berwarna per fase, navigasi mengedit di tempat', async () => {
+// Ambil tombol <tg-button> dari rich html: { text, data, style }
+const richButtons = (h) => [...h.matchAll(/<tg-button type="callback_data"(?: style="(\w+)")? data="([^"]+)">([^<]*)<\/tg-button>/g)]
+  .map((m) => ({ style: m[1], data: m[2], text: m[3] }));
+const rowCount = (h) => (h.match(/<tg-button-row>/g) ?? []).length;
+
+test('/kalender: tombol DI BADAN PESAN (rich), berwarna per fase, tanpa inline keyboard', async () => {
   const t = setup(); await onboard(t);
   await t.say('/kalender');
-  const p = t.api.last('sendMessage');
-  assert.match(p.text, /Oktober 2026/);
-  const kbd = p.reply_markup.inline_keyboard;
-  assert.deepEqual(kbd[0].map((b) => b.text), ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']);
-  const btn = (label) => kbd.flat().find((b) => b.callback_data === `cal:2026-10-${label}`);
+  const p = t.api.last('sendRichMessage');
+  assert.ok(p, 'harus memakai sendRichMessage');
+  assert.equal(p.reply_markup, undefined); // bukan inline keyboard
+  const h = p.rich_message.html;
+  assert.match(h, /Oktober 2026/);
+  assert.equal(rowCount(h), 1 + 5 + 1); // header hari + 5 minggu Okt 2026 + navigasi
+  assert.match(h, /<tg-button type="disabled">Min<\/tg-button>/);
+  const btn = (d) => richButtons(h).find((b) => b.data === `cal:2026-10-${d}`);
   assert.equal(btn('10').style, 'danger');   // haid
   assert.equal(btn('14').style, 'danger');
-  assert.equal(btn('15').style, undefined);  // folikular: warna bawaan
+  assert.equal(btn('15').style, undefined);  // folikular
   assert.equal(btn('19').style, 'success');  // masa subur
   assert.equal(btn('24').style, 'primary');  // ovulasi
   assert.match(btn('24').text, /⭐/);
   assert.match(btn('26').text, /🟣/);        // luteal
-  assert.equal(btn('20').text.startsWith('[20'), true); // hari ini
-  assert.ok(kbd.flat().length <= 100); // batas Telegram
-  assert.ok(kbd.flat().some((b) => b.callback_data === 'cal-month:2026-11'));
+  assert.ok(btn('20').text.startsWith('[20')); // hari ini
+  assert.ok(richButtons(h).some((b) => b.data === 'cal-month:2026-11'));
+  await t.tap('cal-month:2026-11');
+  const e = t.api.last('editMessageText');
+  assert.match(e.rich_message.html, /November 2026/);
+  assert.equal(e.message_id, 7); assert.equal(e.text, undefined);
+});
+
+test('fallback: bila rich message ditolak → teks + inline keyboard berwarna, tercatat sebagai warn', async () => {
+  const t = setup(); await onboard(t);
+  t.api.failing.add('sendRichMessage');
+  await t.say('/kalender');
+  const p = t.api.last('sendMessage');
+  assert.match(p.text, /Oktober 2026/);
+  const kb = p.reply_markup.inline_keyboard.flat();
+  assert.equal(kb.find((b) => b.callback_data === 'cal:2026-10-10').style, 'danger');
+  assert.equal((await t.repo.recentEvents('warn'))[0].source, 'rich-fallback');
+  t.api.failing.add('editMessageText'); // edit rich ditolak → edit klasik
   await t.tap('cal-month:2026-11');
   const e = t.api.last('editMessageText');
   assert.match(e.text, /November 2026/);
-  assert.equal(e.message_id, 7); assert.equal(e.parse_mode, 'HTML');
 });
 
 test('kalender tanpa data siklus tetap tampil (tanpa warna) dengan petunjuk', async () => {
   const t = setup();
   await t.say('/kalender');
-  const p = t.api.last('sendMessage');
-  assert.match(p.text, /\/start/);
-  assert.ok(p.reply_markup.inline_keyboard.flat().every((b) => !b.style));
+  const h = t.api.last('sendRichMessage').rich_message.html;
+  assert.match(h, /\/start/);
+  assert.ok(richButtons(h).every((b) => !b.style));
 });
 
 test('catat gejala lewat chip lalu lihat detail tanggal', async () => {
@@ -89,19 +111,19 @@ test('catat gejala lewat chip lalu lihat detail tanggal', async () => {
   assert.equal(rows.length, 1);
   assert.equal(rows[0].mood, 'Bahagia 😊'); assert.deepEqual(rows[0].other, ['Kembung']); assert.equal(rows[0].notes, 'capek <banget>');
   await t.tap('cal:2026-10-20');
-  const h = t.api.last('editMessageText').text;
+  const h = t.api.last('editMessageText').rich_message.html;
   assert.match(h, /Bahagia 😊/); assert.match(h, /capek &lt;banget&gt;/);
-  assert.match(h, /HPHT|Kembung/);
+  assert.match(h, /Kembung/);
 });
 
 test('detail tanggal kosong & HPHT; tanggal masa depan tanpa tombol catat', async () => {
   const t = setup(); await onboard(t);
   await t.tap('cal:2026-10-10');
   let p = t.api.last('editMessageText');
-  assert.match(p.text, /HPHT tercatat/); assert.match(p.text, /Belum ada catatan/);
+  assert.match(p.rich_message.html, /HPHT tercatat/); assert.match(p.rich_message.html, /Belum ada catatan/);
   await t.tap('cal:2026-10-25');
   p = t.api.last('editMessageText');
-  assert.ok(!p.reply_markup.inline_keyboard.flat().some((b) => b.callback_data.startsWith('log:')));
+  assert.ok(!richButtons(p.rich_message.html).some((b) => b.data.startsWith('log:')));
 });
 
 test('/haid maju-saja, /suhu /lh /tes /kb /wellbeing dengan validasi', async () => {

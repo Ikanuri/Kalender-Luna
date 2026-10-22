@@ -28,8 +28,8 @@ memakai repo/API palsu (`test/helpers/fakes.js`) — tanpa Telegram, tanpa DB.
 |---|---|---|
 | Tanggal | string `YYYY-MM-DD`, aritmetika via nomor hari UTC (`lib/dates.js`) | bebas DST/zona waktu mesin |
 | Zona waktu | `settings.tzOffset` (menit, default 420 = WIB), diubah `/atur zona` | "hari ini" harus mengikuti pengguna, bukan server |
-| Kalender | **Grid tombol inline keyboard** (7 kolom) dengan warna asli tombol (`style`: danger/success/primary) + penanda emoji; pesan klasik HTML | desain final dari pemilik produk; tanpa ketergantungan rich message |
-| Navigasi bulan | `editMessageText` (edit di tempat), fallback kirim baru | tidak memenuhi chat dengan pesan kalender |
+| Kalender | **Grid `<tg-button>` di badan rich message** (`<tg-button-row>` per minggu), warna lewat `style` (danger/success/primary) + penanda emoji; fallback otomatis ke teks + inline keyboard | desain final dari pemilik produk; fallback melindungi dari penolakan API |
+| Navigasi bulan | `editMessageText` + `rich_message` (edit di tempat), fallback edit klasik / kirim baru | tidak memenuhi chat dengan pesan kalender |
 | Warna fase | merah=haid, hijau=subur, biru+⭐=ovulasi, 🟣=luteal | Bot API hanya menyediakan 3 warna tombol |
 | Proyeksi fase | 8 siklus (−2…+5) sesuai PRD, diperpanjang ke belakang agar gejala lama tetap punya fase (maks 36) | PMS/korelasi butuh fase untuk catatan lama |
 | Riwayat awal | HPHT dari onboarding ikut dimasukkan ke `cycle_history` | agar `/haid` berikutnya langsung menghasilkan selisih siklus |

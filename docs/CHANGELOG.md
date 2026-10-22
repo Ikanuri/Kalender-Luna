@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.0] - 2026-10-22
+### Diubah
+- Kalender kembali ke **tombol di badan pesan** (rich message `<tg-button-row>`/`<tg-button>`), bukan inline keyboard: warna fase lewat `style` (merah/hijau/biru), header hari tombol nonaktif, navigasi & detail tanggal mengedit pesan yang sama.
+### Ditambahkan
+- Fallback otomatis ke teks + inline keyboard bila API menolak rich message; dicatat sebagai event `warn` dan tampil di `/diag`.
+
 ## [0.3.1] - 2026-10-22
 ### Diperbaiki
 - Deploy CI merah padahal kode sudah terupload: `@tgcloud/cli` 0.2.0 crash saat menulis snapshot lokal (`ERR_INVALID_ARG_TYPE`, server mengirim isi modul `false`). Workflow kini menoleransi crash spesifik itu dan memverifikasi deploy lewat smoke test yang membandingkan versi di platform dengan `package.json`.

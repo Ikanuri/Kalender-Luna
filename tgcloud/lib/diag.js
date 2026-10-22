@@ -33,13 +33,14 @@ const ago = (ts, nowMs) => {
 };
 
 export async function diagSummary(repo, { today, nowMs }) {
-  const [counts, errors, lastCron] = await Promise.all([repo.tableCounts(), repo.recentEvents('error', 5), repo.recentEvents('cron', 1)]);
+  const [counts, errors, lastCron, warns] = await Promise.all([repo.tableCounts(), repo.recentEvents('error', 5), repo.recentEvents('cron', 1), repo.recentEvents('warn', 1)]);
   const st = summarize(runSelfTest());
   const L = [`🩺 <b>Diagnosis Luna v${VERSION}</b>`, `Self-test: ${st.passed}/${st.total} ${st.failed.length ? '❌' : '✅'}`];
   st.failed.forEach((f) => L.push(`  • ${esc(f.name)}: ${esc(f.detail)}`));
   L.push('', '<b>Baris data</b>: ' + Object.entries(counts).map(([k, v]) => `${k}=${v}`).join(' · '));
   const c = lastCron[0];
   L.push(`<b>Reminder terakhir</b>: ${c ? `${ago(c.ts, nowMs)} — ${esc(JSON.stringify(c.detail))}` : 'belum pernah (pasang pemicu /_cron!)'}`);
+  L.push(`<b>Fallback rich→inline</b>: ${warns[0] ? `terakhir ${ago(warns[0].ts, nowMs)} (${esc(warns[0].detail?.description ?? '')})` : 'tidak pernah ✅ (tombol rich bekerja)'}`);
   L.push('', `<b>Error terbaru</b> (${errors.length ? 'lihat /diag error &lt;id&gt;' : 'tidak ada'}):`);
   errors.forEach((e) => L.push(`#${e.id} ${ago(e.ts, nowMs)} · ${esc(e.label)} · ${esc(e.detail?.message ?? '')}`));
   const audit = auditData(await repo.allForAudit(), today);

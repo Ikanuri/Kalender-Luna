@@ -49,7 +49,8 @@ export function runSelfTest() {
       const flat = cells.flat();
       const styleOf = (label) => flat.find((b) => b.text.startsWith(label))?.style;
       return (cells.every((row) => row.length === 7) && flat.some((b) => b.text.startsWith('[20'))
-        && styleOf('1') === 'danger' && styleOf('10') === 'success' && styleOf('15') === 'primary') || 'grid/warna salah';
+        && styleOf('1') === 'danger' && styleOf('10') === 'success' && styleOf('15') === 'primary'
+        && r.html.includes('<tg-button-row>') && r.html.includes('style="danger"')) || 'grid/warna salah';
     }),
   ];
 }

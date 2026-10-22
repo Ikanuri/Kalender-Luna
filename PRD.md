@@ -566,26 +566,30 @@ fase, dan tiap tanggal bisa di-tap untuk melihat semua atribut yang pernah
 dicatat untuk hari itu.
 
 > **KEPUTUSAN DESAIN FINAL (2026-10-22, menggantikan §14.1–§14.4 di bawah):**
-> kalender = **grid tombol inline keyboard di chat**, tanpa tabel rich HTML.
-> Pesan klasik (`sendMessage`/`editMessageText`, `parse_mode=HTML`) berisi judul
-> bulan + legenda; kalender itu sendiri adalah tombol: baris header hari
-> (Min–Sab), satu tombol per tanggal (7 kolom), baris navigasi
-> (`‹ Sebelumnya` · `Hari ini` · `Berikutnya ›`). Warna fase memakai field
-> `style` tombol Bot API (hanya 3 warna tersedia):
+> kalender = **grid tombol di BADAN pesan chat** (rich message), bukan tabel dan
+> bukan inline keyboard. Dikirim dengan `sendRichMessage`; isinya judul bulan,
+> legenda, lalu satu `<tg-button-row>` per baris: header hari (tombol
+> `type="disabled"`: Min–Sab), satu baris per minggu (7 `<tg-button
+> type="callback_data" data="cal:YYYY-MM-DD">`), dan baris navigasi
+> (`‹ Sebelumnya` · `Hari ini` · `Berikutnya ›`, data `cal-month:YYYY-MM`).
+> Warna fase = atribut `style` tombol (opsi dokumentasi: `danger`, `success`,
+> `primary`, `link`):
 >
 > | Fase | Tombol |
 > |---|---|
-> | `menstruation` | `danger` (merah) |
-> | `fertile` | `success` (hijau) |
-> | `peak` | `primary` (biru) + ⭐ |
-> | `luteal` | warna bawaan + 🟣 |
-> | `safe` | warna bawaan |
+> | `menstruation` | `style="danger"` (merah) |
+> | `fertile` | `style="success"` (hijau) |
+> | `peak` | `style="primary"` (biru) + ⭐ |
+> | `luteal` | tanpa style + 🟣 |
+> | `safe` | tanpa style |
 >
-> Label tombol: `<hari>[⭐/🟣][·]`; hari ini dibungkus `[ ]`; `·` = ada catatan.
-> Navigasi bulan dan detail tanggal **mengedit pesan yang sama**
-> (`editMessageText`), fallback kirim pesan baru. Detail tanggal (§14.5) juga
-> teks HTML klasik. Tidak ada ketergantungan pada rich message. §14.1–§14.4
-> dipertahankan hanya sebagai catatan riset.
+> Teks tombol hanya boleh teks polos/emoji, jadi hari ini ditandai `[20]` dan
+> hari berisi catatan diberi `·`. Navigasi bulan & detail tanggal **mengedit
+> pesan yang sama** (`editMessageText` + `rich_message`). Detail tanggal (§14.5)
+> juga rich message dengan tombol `📝 Catat Gejala` dan `« Kembali ke Kalender` di
+> badan pesan. **Fallback otomatis:** bila API menolak rich message, bot
+> mengirim versi klasik (teks + inline keyboard dengan `style` yang sama) dan
+> mencatat event `warn` yang tampil di `/diag`. §14.1–§14.4 hanya catatan riset.
 
 ### 14.1 Kendala teknis nyata — WAJIB dipahami sebelum desain teknis
 

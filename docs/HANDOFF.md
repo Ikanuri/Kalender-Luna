@@ -6,7 +6,8 @@
 
 **Risiko yang diketahui**
 - `onConflictDoUpdate({ target: [kolomA, kolomB] })` (target komposit) diasumsikan didukung seperti Drizzle; bila tidak, ganti dengan select-lalu-insert/update di `repo.js`.
-- Warna tombol (`style`) butuh klien Telegram terbaru; klien lama menampilkan tombol bawaan (penanda emoji tetap terlihat).
+- Tombol rich (`sendRichMessage` + `<tg-button>`) ditulis dari dokumentasi dan belum dilihat di klien sungguhan. Jika ditolak, bot otomatis fallback ke inline keyboard; `/diag` menampilkan baris “Fallback rich→inline”.
+- Warna tombol butuh klien Telegram terbaru; klien lama menampilkan tombol bawaan (penanda emoji tetap terlihat).
 - Reminder butuh pemicu eksternal.
 - `lib/config.js` menyimpan `adminIds` di kode (SDK tak mendokumentasikan env var).
 
