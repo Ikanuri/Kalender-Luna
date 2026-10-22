@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.3.1] - 2026-10-22
+### Diperbaiki
+- Deploy CI merah padahal kode sudah terupload: `@tgcloud/cli` 0.2.0 crash saat menulis snapshot lokal (`ERR_INVALID_ARG_TYPE`, server mengirim isi modul `false`). Workflow kini menoleransi crash spesifik itu dan memverifikasi deploy lewat smoke test yang membandingkan versi di platform dengan `package.json`.
+
 ## [0.3.0] - 2026-10-22
 ### Diubah
 - Kalender sekarang **grid tombol di chat** (tanpa tabel rich HTML) dengan warna asli tombol per fase: merah=haid, hijau=masa subur, biru+⭐=ovulasi; luteal ditandai 🟣. Navigasi bulan & detail tanggal mengedit pesan yang sama.

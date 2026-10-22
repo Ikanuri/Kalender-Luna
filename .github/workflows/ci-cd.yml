@@ -60,8 +60,22 @@ jobs:
       - name: Perubahan yang akan dideploy
         run: npx tgcloud status
 
+      # Bug @tgcloud/cli 0.2.0: setelah upload sukses, CLI bisa crash saat menulis snapshot
+      # lokal (ERR_INVALID_ARG_TYPE; server mengirim isi modul `false`). Kode SUDAH
+      # terdeploy pada kasus itu → lanjut dengan peringatan; keberhasilan deploy
+      # diverifikasi ketat oleh smoke test (versi di platform harus sama dengan repo).
       - name: Push kode
-        run: npx tgcloud push
+        run: |
+          set +e
+          npx tgcloud push 2>&1 | tee push.out
+          code=${PIPESTATUS[0]}
+          if [ "$code" -ne 0 ]; then
+            if grep -q "ERR_INVALID_ARG_TYPE" push.out && grep -q "✓" push.out; then
+              echo "::warning::CLI crash saat menulis snapshot lokal setelah upload; deploy diverifikasi oleh smoke test."
+            else
+              exit "$code"
+            fi
+          fi
 
       # --safe: hanya perubahan aditif (tabel/kolom/indeks baru) diterapkan otomatis.
       # Drop, tipe kolom, dll. sengaja dilewati → jalankan `tgcloud migrate` manual.
@@ -72,3 +86,5 @@ jobs:
         run: |
           npx tgcloud run endpoints/health '{}' --ctx '{ initData: { user: { id: 1 } } }' | tee health.out
           grep -Eq '"?ok"?[: ]+true' health.out || { echo "::error::Health check gagal setelah deploy"; exit 1; }
+          want=$(node -p "require('./package.json').version")
+          grep -Eq "\"?version\"?[: ]+['\"]?$want" health.out || { echo "::error::Versi di platform bukan $want — deploy tidak masuk"; exit 1; }

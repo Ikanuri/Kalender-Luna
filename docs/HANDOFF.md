@@ -17,3 +17,5 @@
 2. `TGCLOUD_TOKEN=<token> npx tgcloud push` lalu `npx tgcloud migrate` (konfirmasi tabel baru).
 3. Uji: `npx tgcloud run handlers/message '{ chat:{id:1,type:"private"}, from:{id:1}, text:"/bantuan" }'`.
 4. Kirim /start ke bot di Telegram.
+
+**Bug CLI yang diketahui:** `@tgcloud/cli` 0.2.0 kadang crash di `writeSnapshotFile` setelah push sukses (isi modul `false` dari server). Dilaporkan perlu ke tim tgcloud; workflow sudah menoleransinya (lihat `ci-cd.yml`). Bila muncul lagi di komputer lokal: `npx tgcloud fetch` lalu `status`.

@@ -1,6 +1,6 @@
 {
   "name": "luna-telegram",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "type": "module",
   "description": "Luna Telegram — bot & Mini App kalender siklus di atas Telegram Serverless",
