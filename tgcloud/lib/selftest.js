@@ -42,10 +42,14 @@ export function runSelfTest() {
       return Math.abs(a.std - 2.5166) < 1e-3 || `std=${a.std}`; // lengths 26,31,28 → var 6.333
     }),
     t('parser tanggal & suhu', () => eq([parseDate('03/10/2026', '2026-10-20'), parseDate('kemarin', '2026-10-20'), parseTemp('36,6'), parseTemp('40')], ['2026-10-03', '2026-10-19', 36.6, null])),
-    t('render kalender: 7 kolom, hari ini tebal', () => {
+    t('render kalender: 7 kolom, hari ini [ ], fase berwarna', () => {
       const m = createCycleModel({ settings: base, history: [], lh: [], bbt: [] }, '2026-01-20');
       const r = renderMonth({ ym: '2026-01', model: m, today: '2026-01-20' });
-      return (r.keyboard.slice(0, -1).every((row) => row.length === 7) && r.html.includes('<b>20')) || 'grid/tebal salah';
+      const cells = r.keyboard.slice(0, -1);
+      const flat = cells.flat();
+      const styleOf = (label) => flat.find((b) => b.text.startsWith(label))?.style;
+      return (cells.every((row) => row.length === 7) && flat.some((b) => b.text.startsWith('[20'))
+        && styleOf('1') === 'danger' && styleOf('10') === 'success' && styleOf('15') === 'primary') || 'grid/warna salah';
     }),
   ];
 }

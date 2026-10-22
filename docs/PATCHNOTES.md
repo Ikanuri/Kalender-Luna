@@ -1,5 +1,8 @@
 # Patch Notes
 
+## [0.3.0] - 2026-10-22
+Kalender kini berupa tombol berwarna langsung di chat: merah untuk haid, hijau untuk masa subur, biru ⭐ untuk ovulasi, 🟣 untuk luteal. Ketuk tanggal untuk detail, panah untuk ganti bulan.
+
 ## [0.2.1] - 2026-10-22
 Perbaikan deploy otomatis: deploy kedua dan seterusnya dari GitHub sekarang berjalan.
 

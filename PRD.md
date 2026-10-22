@@ -565,6 +565,28 @@ Telegram (bukan cuma lewat Mini App terpisah), berbentuk tabel berwarna per
 fase, dan tiap tanggal bisa di-tap untuk melihat semua atribut yang pernah
 dicatat untuk hari itu.
 
+> **KEPUTUSAN DESAIN FINAL (2026-10-22, menggantikan §14.1–§14.4 di bawah):**
+> kalender = **grid tombol inline keyboard di chat**, tanpa tabel rich HTML.
+> Pesan klasik (`sendMessage`/`editMessageText`, `parse_mode=HTML`) berisi judul
+> bulan + legenda; kalender itu sendiri adalah tombol: baris header hari
+> (Min–Sab), satu tombol per tanggal (7 kolom), baris navigasi
+> (`‹ Sebelumnya` · `Hari ini` · `Berikutnya ›`). Warna fase memakai field
+> `style` tombol Bot API (hanya 3 warna tersedia):
+>
+> | Fase | Tombol |
+> |---|---|
+> | `menstruation` | `danger` (merah) |
+> | `fertile` | `success` (hijau) |
+> | `peak` | `primary` (biru) + ⭐ |
+> | `luteal` | warna bawaan + 🟣 |
+> | `safe` | warna bawaan |
+>
+> Label tombol: `<hari>[⭐/🟣][·]`; hari ini dibungkus `[ ]`; `·` = ada catatan.
+> Navigasi bulan dan detail tanggal **mengedit pesan yang sama**
+> (`editMessageText`), fallback kirim pesan baru. Detail tanggal (§14.5) juga
+> teks HTML klasik. Tidak ada ketergantungan pada rich message. §14.1–§14.4
+> dipertahankan hanya sebagai catatan riset.
+
 ### 14.1 Kendala teknis nyata — WAJIB dipahami sebelum desain teknis
 
 Dicek langsung ke dokumentasi resmi Telegram Bot API (bagian "Rich

@@ -1,5 +1,6 @@
-// PRD §14 — kalender rich HTML di chat. Warna = emoji (Telegram tidak
-// mendukung warna sel). Jalur B: tabel untuk tampilan + inline keyboard untuk klik.
+// PRD §14 — kalender di chat berupa GRID TOMBOL (inline keyboard). Warna fase =
+// `style` tombol Bot API (danger=merah, success=hijau, primary=biru); fase tanpa
+// warna asli dibedakan lewat penanda emoji. Pesan berisi teks HTML klasik.
 import { MONTHS, daysInMonth, dow, formatLong } from './dates.js';
 import { KB_STATUS_LABEL, LH_LABEL, PHASE_EMOJI, PHASE_ICON, PHASE_LABEL, PREG_LABEL } from './constants.js';
 import { esc } from './html.js';
@@ -29,54 +30,41 @@ export function monthCells(ym) {
 
 const dateOf = (ym, d) => `${ym}-${String(d).padStart(2, '0')}`;
 
-/** Teks sel §14.2: <hari><emoji>[·], tebal bila hari ini. */
-export function cellLabel({ day, phase, isToday, hasData, html = false }) {
-  const core = `${day}${phase ? PHASE_EMOJI[phase] : ''}${hasData ? '·' : ''}`;
-  return html && isToday ? `<b>${core}</b>` : core;
+/** Warna asli tombol per fase (Bot API hanya punya 3 warna). */
+export const PHASE_STYLE = { menstruation: 'danger', fertile: 'success', peak: 'primary' };
+// Penanda untuk fase yang tidak punya warna asli / sebagai pembeda tambahan.
+const PHASE_MARK = { peak: '⭐', luteal: '🟣' };
+
+/** Label tombol: <hari>[penanda fase][·]; hari ini dibungkus [ ]. */
+export function cellLabel({ day, phase, isToday, hasData }) {
+  const core = `${day}${phase ? (PHASE_MARK[phase] ?? '') : ''}${hasData ? '·' : ''}`;
+  return isToday ? `[${core}]` : core;
 }
 
 /**
  * @param model createCycleModel(...) atau null (belum onboarding)
  * @param recorded Set tanggal yang punya catatan apa pun
- * @param clickableCells true = Jalur A (tg-button di dalam sel), false = Jalur B
+ * @returns { text, keyboard } — text = HTML Telegram klasik (parse_mode HTML)
  */
-export function renderMonth({ ym, model, today, recorded = new Set(), clickableCells = false }) {
+export function renderMonth({ ym, model, today, recorded = new Set() }) {
   const [y, m] = ym.split('-').map(Number);
-  const weeks = monthCells(ym);
-  const cell = (day, html) => {
-    if (!day) return null;
-    const date = dateOf(ym, day);
-    return {
-      date,
-      label: cellLabel({ day, phase: model?.phaseOn(date) ?? null, isToday: date === today, hasData: recorded.has(date), html }),
-    };
-  };
-
-  let html = `<h3>${MONTHS[m - 1]} ${y}</h3><table bordered><tr>${HEAD.map((h) => `<th>${h}</th>`).join('')}</tr>`;
-  for (const week of weeks) {
-    html += '<tr>' + week.map((day) => {
-      const c = cell(day, true);
-      if (!c) return '<td>&nbsp;</td>';
-      return clickableCells
-        ? `<td><tg-button type="callback_data" style="link" data="cal:${c.date}">${c.label}</tg-button></td>`
-        : `<td>${c.label}</td>`;
-    }).join('') + '</tr>';
-  }
-  html += '</table>';
-  html += `<p>${['menstruation', 'fertile', 'peak', 'luteal', 'safe'].map((p) => `${PHASE_EMOJI[p]} ${PHASE_LABEL[p].split(' (')[0]}`).join(' · ')}</p>`;
-  html += '<p><i>· = ada catatan, tebal = hari ini</i></p>';
-
-  const keyboard = [];
-  if (!clickableCells) {
-    for (const week of weeks) {
-      keyboard.push(week.map((day) => {
-        const c = cell(day, false);
-        return c ? { text: c.label, callback_data: `cal:${c.date}` } : { text: '·', callback_data: 'noop' };
-      }));
-    }
+  const keyboard = [HEAD.map((h) => ({ text: h, callback_data: 'noop' }))];
+  for (const week of monthCells(ym)) {
+    keyboard.push(week.map((day) => {
+      if (!day) return { text: '·', callback_data: 'noop' };
+      const date = dateOf(ym, day);
+      const phase = model?.phaseOn(date) ?? null;
+      const b = { text: cellLabel({ day, phase, isToday: date === today, hasData: recorded.has(date) }), callback_data: `cal:${date}` };
+      if (phase && PHASE_STYLE[phase]) b.style = PHASE_STYLE[phase];
+      return b;
+    }));
   }
   keyboard.push(navRow(ym, today));
-  return { html, keyboard };
+  const text = `📅 <b>${MONTHS[m - 1]} ${y}</b>\n`
+    + '🟥 Haid · 🟩 Masa subur · 🟦⭐ Ovulasi · 🟣 Luteal · ⬜ Aman\n'
+    + '<i>[ ] hari ini · · ada catatan · ketuk tanggal untuk detail</i>'
+    + (model ? '' : '\n\n<i>Isi data siklus lewat /start agar kalender berwarna.</i>');
+  return { text, keyboard };
 }
 
 function navRow(ym, today) {
@@ -87,34 +75,32 @@ function navRow(ym, today) {
   ];
 }
 
-/** §14.5 — detail tanggal. rows = { symptoms, bbt, wellbeing, lh, kb[], preg[] } + isHPHT, phase. */
+/** §14.5 — detail tanggal (HTML Telegram klasik). */
 export function renderDayDetail({ date, phase, isHPHT, rows, today }) {
   const { symptoms: s, bbt, wellbeing: w, lh, kb = [], preg = [] } = rows;
-  let h = `<h3>📅 ${esc(formatLong(date))}</h3>`;
-  if (phase) h += `<p>${PHASE_ICON[phase]} ${esc(PHASE_LABEL[phase])}</p>`;
-  if (isHPHT) h += '<p>🩸 HPHT tercatat di tanggal ini</p>';
+  const L = [`📅 <b>${esc(formatLong(date))}</b>`];
+  if (phase) L.push(`${PHASE_ICON[phase]} ${esc(PHASE_LABEL[phase])}`);
+  if (isHPHT) L.push('🩸 HPHT tercatat di tanggal ini');
   let any = false;
   if (s) {
     any = true;
-    const li = [];
-    if (s.flow) li.push(`Aliran: ${esc(s.flow)}`);
-    if (s.pain) li.push(`Nyeri: ${esc(s.pain)}`);
-    if (s.mood) li.push(`Mood: ${esc(s.mood)}`);
-    if (s.discharge) li.push(`Keputihan: ${esc(s.discharge)}`);
-    if (s.other?.length) li.push(`Lainnya: ${esc(s.other.join(', '))}`);
-    if (s.notes) li.push(`Catatan: “${esc(s.notes)}”`);
-    h += `<p>📋 <b>Gejala</b></p><ul>${li.map((x) => `<li>${x}</li>`).join('')}</ul>`;
+    L.push('', '📋 <b>Gejala</b>');
+    if (s.flow) L.push(`• Aliran: ${esc(s.flow)}`);
+    if (s.pain) L.push(`• Nyeri: ${esc(s.pain)}`);
+    if (s.mood) L.push(`• Mood: ${esc(s.mood)}`);
+    if (s.discharge) L.push(`• Keputihan: ${esc(s.discharge)}`);
+    if (s.other?.length) L.push(`• Lainnya: ${esc(s.other.join(', '))}`);
+    if (s.notes) L.push(`• Catatan: “${esc(s.notes)}”`);
   }
-  if (bbt) { any = true; h += `<p>🌡️ Suhu Basal: ${bbt.tempCelsius}°C</p>`; }
-  if (w) { any = true; h += `<p>🌟 Wellbeing: Energi ${w.energy}/5 · Tidur ${w.sleep}/5 · Nafsu makan ${w.appetite}/5 · Mood ${w.mood}/5</p>`; }
-  if (lh) { any = true; h += `<p>🧪 Tes LH: ${LH_LABEL[lh.result]}</p>`; }
-  for (const k of kb) { any = true; h += `<p>💊 Kontrasepsi: ${esc(k.type)} — ${KB_STATUS_LABEL[k.status]}</p>`; }
-  for (const p of preg) { any = true; h += `<p>🧪 Test Pack: ${PREG_LABEL[p.result]}</p>`; }
-  if (!any) h += '<p>Belum ada catatan untuk tanggal ini.</p>';
+  if (bbt) { any = true; L.push('', `🌡️ Suhu Basal: ${bbt.tempCelsius}°C`); }
+  if (w) { any = true; L.push('', `🌟 Wellbeing: Energi ${w.energy}/5 · Tidur ${w.sleep}/5 · Nafsu makan ${w.appetite}/5 · Mood ${w.mood}/5`); }
+  if (lh) { any = true; L.push('', `🧪 Tes LH: ${LH_LABEL[lh.result]}`); }
+  for (const k of kb) { any = true; L.push(`💊 Kontrasepsi: ${esc(k.type)} — ${KB_STATUS_LABEL[k.status]}`); }
+  for (const p of preg) { any = true; L.push(`🧪 Test Pack: ${PREG_LABEL[p.result]}`); }
+  if (!any) L.push('', 'Belum ada catatan untuk tanggal ini.');
 
   const keyboard = [];
   if (date <= today) keyboard.push([{ text: '📝 Catat Gejala Hari Ini', callback_data: `log:${date}` }]);
   keyboard.push([{ text: '« Kembali ke Kalender', callback_data: `cal-month:${date.slice(0, 7)}` }]);
-  return { html: h, keyboard };
+  return { text: L.join('\n'), keyboard };
 }
-

@@ -11,7 +11,7 @@ import { fakeApi, fakeRepo, msg, cb } from './helpers/fakes.js';
 const NOW = Date.UTC(2026, 9, 20, 3, 0);
 const setup = () => {
   const api = fakeApi(), repo = fakeRepo();
-  const bot = createBot({ api, repo, now: () => NOW, config: { adminIds: [99], clickableCells: false, defaultTzOffset: 420 } });
+  const bot = createBot({ api, repo, now: () => NOW, config: { adminIds: [99], defaultTzOffset: 420 } });
   return { api, repo, bot, say: (t, uid = 1) => bot.handleMessage(msg(uid, t)), tap: (d, uid = 1) => bot.handleCallback(cb(uid, d)) };
 };
 

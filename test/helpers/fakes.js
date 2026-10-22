@@ -56,7 +56,7 @@ export function fakeApi() {
   const rec = (m) => async (p) => { calls.push({ m, p }); return { message_id: calls.length }; };
   return {
     calls,
-    sendMessage: rec('sendMessage'), sendRichMessage: rec('sendRichMessage'),
+    sendMessage: rec('sendMessage'),
     editMessageText: rec('editMessageText'), answerCallbackQuery: rec('answerCallbackQuery'),
     last: (m) => [...calls].reverse().find((c) => !m || c.m === m)?.p,
   };

@@ -1,4 +1,4 @@
-// Konstanta domain — PRD §5.3, §7.1, §14.2, §22, §24.2.
+// Konstanta domain — PRD §5.3, §7.1, §14, §22, §24.2.
 
 export const CHIP_DEFS = {
   flow: ['Tidak ada', 'Flek', 'Ringan', 'Sedang', 'Deras'],
@@ -18,7 +18,7 @@ export const CHIP_LABELS = {
 export const NEUTRAL_MOODS = ['Normal', 'Bahagia 😊'];
 
 export const PHASES = ['menstruation', 'fertile', 'peak', 'luteal', 'safe'];
-export const PHASE_EMOJI = { menstruation: '🔴', fertile: '🟢', peak: '🟡', luteal: '🟣', safe: '⚪' };
+export const PHASE_EMOJI = { menstruation: '🟥', fertile: '🟩', peak: '🟦', luteal: '🟣', safe: '⬜' }; // sama dengan warna tombol kalender
 export const PHASE_ICON = { menstruation: '🩸', fertile: '🌿', peak: '⭐', luteal: '🌙', safe: '✨' };
 export const PHASE_LABEL = {
   menstruation: 'Haid', fertile: 'Masa subur', peak: 'Puncak kesuburan (ovulasi)',

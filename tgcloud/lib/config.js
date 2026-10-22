@@ -3,8 +3,5 @@
 export default {
   // user_id Telegram yang boleh memicu /_cron (penyapu reminder harian).
   adminIds: [582589514],
-  // true = Jalur A (tg-button di dalam sel tabel). Set setelah divalidasi lewat
-  // `tgcloud run` + perangkat nyata (PRD §14.1); default Jalur B yang pasti jalan.
-  clickableCells: false,
   defaultTzOffset: 420, // WIB, menit dari UTC
 };

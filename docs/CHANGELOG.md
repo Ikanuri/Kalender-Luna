@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0] - 2026-10-22
+### Diubah
+- Kalender sekarang **grid tombol di chat** (tanpa tabel rich HTML) dengan warna asli tombol per fase: merah=haid, hijau=masa subur, biru+⭐=ovulasi; luteal ditandai 🟣. Navigasi bulan & detail tanggal mengedit pesan yang sama.
+### Dihapus
+- Jalur rich message / `clickableCells` dan ketergantungan pada `sendRichMessage`. PRD §14 diberi keputusan desain final.
+
 ## [0.2.1] - 2026-10-22
 ### Diperbaiki
 - Deploy CI gagal pada run kedua ("never synced with it"): ditambah `tgcloud fetch` sebelum `push` di `ci-cd.yml`.

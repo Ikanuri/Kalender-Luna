@@ -42,18 +42,6 @@ export function createBot({ api, repo, config = defaultConfig, now = () => Date.
   const html = (chat_id, text, keyboard) => api.sendMessage({
     chat_id, text, parse_mode: 'HTML', ...(keyboard ? { reply_markup: { inline_keyboard: keyboard } } : {}),
   });
-  const sendRich = (chat_id, h, keyboard) => api.sendRichMessage({
-    chat_id, rich_message: { html: h }, reply_markup: { inline_keyboard: keyboard },
-  });
-  /** Edit di tempat; bila gagal (pesan lama/tipe beda) kirim pesan baru. */
-  async function showRich(msg, h, keyboard) {
-    try {
-      await api.editMessageText({ chat_id: msg.chat.id, message_id: msg.message_id, rich_message: { html: h }, reply_markup: { inline_keyboard: keyboard } });
-    } catch (e) {
-      if (e?.description && /not modified/i.test(e.description)) return;
-      await sendRich(msg.chat.id, h, keyboard);
-    }
-  }
   async function showText(msg, text, keyboard) {
     try {
       await api.editMessageText({ chat_id: msg.chat.id, message_id: msg.message_id, text, parse_mode: 'HTML', ...(keyboard ? { reply_markup: { inline_keyboard: keyboard } } : {}) });
@@ -103,8 +91,8 @@ export function createBot({ api, repo, config = defaultConfig, now = () => Date.
     async kalender({ uid, chat, args }) {
       const c = await loadCtx(uid);
       const ym = args[0] && /^\d{4}-(0[1-9]|1[0-2])$/.test(args[0]) ? args[0] : c.today.slice(0, 7);
-      const r = renderMonth({ ym, model: c.model, today: c.today, recorded: await repo.recordedDates(uid, ym), clickableCells: config.clickableCells });
-      return sendRich(chat, r.html, r.keyboard);
+      const r = renderMonth({ ym, model: c.model, today: c.today, recorded: await repo.recordedDates(uid, ym) });
+      return html(chat, r.text, r.keyboard);
     },
 
     async status({ uid, chat }) {
@@ -404,14 +392,14 @@ export function createBot({ api, repo, config = defaultConfig, now = () => Date.
         const c = await loadCtx(uid);
         const day = await repo.dayRows(uid, date);
         const r = renderDayDetail({ date, phase: c.model?.phaseOn(date) ?? null, isHPHT: day.isHPHT, rows: day.rows, today: c.today });
-        return showRich(msg, r.html, r.keyboard);
+        return showText(msg, r.text, r.keyboard);
       }
       if (data.startsWith('cal-month:')) {
         const ym = data.slice(10);
         if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(ym)) return;
         const c = await loadCtx(uid);
-        const r = renderMonth({ ym, model: c.model, today: c.today, recorded: await repo.recordedDates(uid, ym), clickableCells: config.clickableCells });
-        return showRich(msg, r.html, r.keyboard);
+        const r = renderMonth({ ym, model: c.model, today: c.today, recorded: await repo.recordedDates(uid, ym) });
+        return showText(msg, r.text, r.keyboard);
       }
       if (data.startsWith('ob:')) {
         const st = await repo.getConv(uid);
