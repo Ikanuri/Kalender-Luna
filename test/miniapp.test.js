@@ -39,3 +39,14 @@ test('semua data dinamis di-escape sebelum masuk innerHTML', () => {
   const app = read('app.js');
   for (const v of ['r.notes', 's.notes', 'x.alasan', 'r.tag', 'st.pregnancy.label', 'st.pregnancy.advice']) assert.ok(!app.includes('${' + v + '}'), `${v} disisipkan tanpa esc()`);
 });
+
+test('CSS kalender: ruang untuk tanggal terpilih (tak terpotong) dan semua sel punya latar', () => {
+  const css = read('style.css');
+  // wadah dengan overflow:hidden harus punya padding & margin negatif yang saling meniadakan
+  const body = css.match(/\.cal-body\s*\{([^}]*)\}/)?.[1] ?? '';
+  const pad = body.match(/padding:\s*(\d+)px\s+(\d+)px/), mar = body.match(/margin:\s*-(\d+)px\s+-(\d+)px/);
+  assert.ok(pad && mar && pad[1] === mar[1] && pad[2] === mar[2] && +pad[1] >= 6 && +pad[2] >= 6, '.cal-body: padding/margin negatif tidak seimbang');
+  const day = css.match(/\.day\s*\{([^}]*)\}/)?.[1] ?? '';
+  assert.match(day, /background:/, '.day harus punya latar dasar');
+  assert.match(css, /\.day\[data-p="s"\]\s*\{[^}]*background:/, 'fase folikular harus punya latar');
+});

@@ -1,5 +1,8 @@
 # Patch Notes
 
+## [0.7.1] - 2026-10-23
+Perbaikan tampilan kalender: tanggal yang dipilih tidak lagi terpotong, semua tanggal punya latar yang seragam, dan legenda lebih rapi.
+
 ## [0.7.0] - 2026-10-23
 Pengingat siklus kini terkirim otomatis tiap pagi (08:07 WIB) lewat GitHub Actions: haid besok, ovulasi besok, dan masa subur.
 

@@ -8,10 +8,10 @@ const $ = (s) => document.querySelector(s);
 const app = $('#app'), nav = $('#nav'), sheet = $('#sheet'), backdrop = $('#backdrop'), toastEl = $('#toast');
 
 const PH = {
-  m: { name: 'Haid', icon: '🩸', color: 'var(--m)', desc: 'Haid sedang berlangsung. Istirahat cukup, minum air hangat, dan dengarkan tubuhmu.' },
-  f: { name: 'Masa Subur', icon: '🌿', color: 'var(--f)', desc: 'Peluang hamil meningkat. Ovulasi sudah dekat.' },
-  p: { name: 'Ovulasi', icon: '⭐', color: 'var(--p)', desc: 'Puncak kesuburan — hari ovulasi.' },
-  l: { name: 'Fase Luteal', icon: '🌙', color: 'var(--l)', desc: 'Energi mulai turun dan gejala PMS bisa muncul. Jaga istirahat.' },
+  m: { short: 'Haid', name: 'Haid', icon: '🩸', color: 'var(--m)', desc: 'Haid sedang berlangsung. Istirahat cukup, minum air hangat, dan dengarkan tubuhmu.' },
+  f: { short: 'Subur', name: 'Masa Subur', icon: '🌿', color: 'var(--f)', desc: 'Peluang hamil meningkat. Ovulasi sudah dekat.' },
+  p: { short: 'Ovulasi', name: 'Ovulasi', icon: '⭐', color: 'var(--p)', desc: 'Puncak kesuburan — hari ovulasi.' },
+  l: { short: 'Luteal', name: 'Fase Luteal', icon: '🌙', color: 'var(--l)', desc: 'Energi mulai turun dan gejala PMS bisa muncul. Jaga istirahat.' },
   s: { name: 'Fase Folikular', icon: '✨', color: 'var(--s)', desc: 'Energi cenderung naik. Masa relatif aman.' },
 };
 const CODE = { menstruation: 'm', fertile: 'f', peak: 'p', luteal: 'l', safe: 's' };
@@ -204,7 +204,7 @@ function viewSiklus() {
     const older = hist[i + 1];
     return `<div class="item"><div><b>${fmtShort(h.date)}</b><div class="t">${older ? `${diffDays(h.date, older.date)} hari sejak siklus sebelumnya · ` : ''}haid ${h.periodLength} hari</div></div><button class="x" data-a="del" data-kind="cycle" data-date="${h.date}" aria-label="Hapus">✕</button></div>`;
   }).join('') : '<div class="empty">Belum ada riwayat.</div>';
-  const legend = st.configured ? `<div class="legend rise">${['m', 'f', 'p', 'l'].map((k) => `<span><i style="background:${PH[k].color}"></i>${PH[k].name}</span>`).join('')}<span><i style="background:var(--lav)"></i>Ada catatan</span></div>` : '';
+  const legend = st.configured ? `<div class="legend rise">${['m', 'f', 'p', 'l'].map((k) => `<span><i style="background:${PH[k].color}"></i>${PH[k].short}</span>`).join('')}<span><i style="background:var(--lav)"></i>Ada catatan</span></div>` : '';
   const info = S.sel ? dayInfoHTML(S.sel) : '<h3>Ketuk tanggal</h3><p>Lihat fase dan catatan hari itu.</p>';
   return `<div class="rise">${legend}
     <div class="card" style="--i:1"><div class="cal-nav"><button data-a="month" data-n="-1" aria-label="Bulan sebelumnya">‹</button><h3 id="monthLabel">${MONTHS[m - 1]} ${y}</h3><button data-a="month" data-n="1" aria-label="Bulan berikutnya">›</button></div>

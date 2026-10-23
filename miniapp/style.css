@@ -104,24 +104,25 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 500; }
 .row { display: flex; gap: 10px; align-items: center; } .row.sp { justify-content: space-between; } .mt { margin-top: 14px; }
 
 /* kalender */
-.legend { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-top: 14px; font-size: .72rem; color: var(--ink-mid); }
+.legend { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 14px; font-size: .72rem; color: var(--ink-mid); }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
 .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .cal-nav h3 { font-size: 1.25rem; color: var(--rose-deep); }
 .cal-nav button { width: 38px; height: 38px; border-radius: 50%; background: var(--rose-pale); color: var(--rose-deep); font-size: 1.2rem; transition: transform .25s var(--spring); } .cal-nav button:active { transform: scale(.85); }
 .weekdays, .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
 .weekdays div { text-align: center; font-size: .64rem; font-weight: 700; letter-spacing: .08em; color: var(--ink-light); padding-bottom: 6px; text-transform: uppercase; }
-.cal-body { overflow: hidden; }
+/* overflow disembunyikan untuk animasi geser bulan; padding/margin negatif memberi ruang bagi tanggal terpilih (scale + cincin) agar tidak terpotong */
+.cal-body { overflow: hidden; padding: 10px 8px; margin: -10px -8px; }
 .grid { animation: gridIn .45s var(--ease) both; } .grid.back { animation-name: gridInBack; }
 @keyframes gridIn { from { opacity: 0; transform: translateX(34px); } } @keyframes gridInBack { from { opacity: 0; transform: translateX(-34px); } }
-.day { aspect-ratio: 1; border-radius: 14px; position: relative; display: grid; place-items: center; font-size: .86rem; font-weight: 600; color: var(--ink-mid); transition: transform .25s var(--spring), background .3s; }
+.day { aspect-ratio: 1; border-radius: 14px; position: relative; display: grid; place-items: center; font-size: .86rem; font-weight: 600; color: var(--ink-mid); background: color-mix(in srgb, var(--ink) 5%, transparent); transition: transform .25s var(--spring), background .3s; }
 .day:active { transform: scale(.86); }
-.day.empty-d { pointer-events: none; }
+.day.empty-d { pointer-events: none; background: none; }
 .day[data-p="m"] { background: color-mix(in srgb, var(--m) 20%, transparent); color: var(--m); }
 .day[data-p="f"] { background: color-mix(in srgb, var(--f) 20%, transparent); color: var(--f); }
 .day[data-p="p"] { background: var(--p); color: #fff; box-shadow: 0 4px 14px color-mix(in srgb, var(--p) 45%, transparent); }
-.day[data-p="l"] { background: color-mix(in srgb, var(--l) 14%, transparent); color: var(--l); }
-.day[data-p="s"] { color: var(--ink-mid); }
+.day[data-p="l"] { background: color-mix(in srgb, var(--l) 20%, transparent); color: var(--l); }
+.day[data-p="s"] { color: var(--ink-mid); background: color-mix(in srgb, var(--ink) 5%, transparent); }
 .day.today { outline: 2px solid var(--ink); outline-offset: 1px; font-weight: 800; }
 .day.sel { transform: scale(1.1); box-shadow: 0 0 0 2px var(--rose); }
 .day .dot { position: absolute; bottom: 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--lav); }

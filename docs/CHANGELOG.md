@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.7.1] - 2026-10-23
+### Diperbaiki
+- Mini App, kalender: tanggal yang diketuk terpotong di tepi atas/bawah (wadah `overflow:hidden` untuk animasi geser bulan memotong scale + cincin) → ruang disediakan lewat padding/margin negatif; terverifikasi di baris pertama/tengah/terakhir pada lebar 450 dan 390 px.
+- Hari tanpa latar (fase folikular) tampak seperti sel hilang → semua sel kini punya latar dasar; luteal sedikit lebih pekat agar tetap terbedakan.
+- Legenda memakai nama pendek (Haid · Subur · Ovulasi · Luteal) sehingga satu baris sampai 360 px.
+
 ## [0.7.0] - 2026-10-23
 ### Ditambahkan
 - Reminder harian otomatis: `.github/workflows/reminders.yml` (01:07 UTC = 08:07 WIB; `workflow_dispatch` dengan opsi dry-run) memanggil `endpoints/cron` lewat `tgcloud run`. Endpoint khusus admin (`lib/cron.js`) dengan dry-run, shard (`user_id % of`), dan `previousRun` sebagai bukti catatan DB bertahan. Biaya Actions ≈30 menit/bulan, tidak naik menurut jumlah pengguna. 7 tes baru (total 67).
