@@ -35,3 +35,9 @@ export const haptic = {
   err: () => { try { tg()?.HapticFeedback?.notificationOccurred('error'); } catch {} },
 };
 export const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+/** "13–17 Okt", "24 Okt", atau "25 Okt – 6 Nov". */
+export const fmtRange = (a, b) => {
+  if (a === b) return fmtDM(a);
+  const [, m1, d1] = a.split('-').map(Number), [, m2, d2] = b.split('-').map(Number);
+  return m1 === m2 ? `${d1}–${d2} ${MONTHS[m2 - 1].slice(0, 3)}` : `${fmtDM(a)} – ${fmtDM(b)}`;
+};

@@ -1,17 +1,17 @@
 // Luna Mini App. UI murni: semua perhitungan siklus (fase, prediksi, analisis) datang dari
 // server lewat getState()/act(). Di sini hanya render, animasi, dan form.
 import { getState, act } from './api.js';
-import { MONTHS, DOW_SHORT, addDays, diffDays, esc, fmtDM, fmtLong, fmtShort, haptic, monthGrid, nextMonth, prevMonth, reduceMotion } from './util.js';
+import { MONTHS, DOW_SHORT, addDays, diffDays, esc, fmtDM, fmtLong, fmtRange, fmtShort, haptic, monthGrid, nextMonth, prevMonth, reduceMotion } from './util.js';
 
 const tg = window.Telegram?.WebApp;
 const $ = (s) => document.querySelector(s);
 const app = $('#app'), nav = $('#nav'), sheet = $('#sheet'), backdrop = $('#backdrop'), toastEl = $('#toast');
 
 const PH = {
-  m: { short: 'Haid', name: 'Haid', icon: '🩸', color: 'var(--m)', desc: 'Haid sedang berlangsung. Istirahat cukup, minum air hangat, dan dengarkan tubuhmu.' },
-  f: { short: 'Subur', name: 'Masa Subur', icon: '🌿', color: 'var(--f)', desc: 'Peluang hamil meningkat. Ovulasi sudah dekat.' },
-  p: { short: 'Ovulasi', name: 'Ovulasi', icon: '⭐', color: 'var(--p)', desc: 'Puncak kesuburan — hari ovulasi.' },
-  l: { short: 'Luteal', name: 'Fase Luteal', icon: '🌙', color: 'var(--l)', desc: 'Energi mulai turun dan gejala PMS bisa muncul. Jaga istirahat.' },
+  m: { short: 'Haid', name: 'Haid', icon: '🩸', color: 'var(--m)', desc: 'Lapisan rahim luruh. Energi bisa turun dan kram muncul; istirahat cukup dan penuhi asupan zat besi.' },
+  f: { short: 'Subur', name: 'Masa Subur', icon: '🌿', color: 'var(--f)', desc: 'Sekitar 5 hari sebelum ovulasi. Sperma bisa bertahan hingga 5 hari, sehingga peluang hamil meningkat.' },
+  p: { short: 'Ovulasi', name: 'Ovulasi', icon: '⭐', color: 'var(--p)', desc: 'Sel telur dilepas; peluang hamil paling tinggi. Suhu basal biasanya naik setelahnya.' },
+  l: { short: 'Luteal', name: 'Fase Luteal', icon: '🌙', color: 'var(--l)', desc: 'Setelah ovulasi hingga haid berikutnya. Progesteron naik dan PMS bisa muncul; energi cenderung melambat.' },
   s: { name: 'Fase Folikular', icon: '✨', color: 'var(--s)', desc: 'Energi cenderung naik. Masa relatif aman.' },
 };
 const CODE = { menstruation: 'm', fertile: 'f', peak: 'p', luteal: 'l', safe: 's' };
@@ -210,11 +210,21 @@ function viewSiklus() {
     <div class="card" style="--i:1"><div class="cal-nav"><button data-a="month" data-n="-1" aria-label="Bulan sebelumnya">‹</button><h3 id="monthLabel">${MONTHS[m - 1]} ${y}</h3><button data-a="month" data-n="1" aria-label="Bulan berikutnya">›</button></div>
       <div class="weekdays">${DOW_SHORT.map((d) => `<div>${d}</div>`).join('')}</div><div class="cal-body" id="calBody">${calendarBody(S.month)}</div>
       <div class="phase-info" id="phaseInfo">${info}</div></div>
-    <div class="card" style="--i:2"><div class="card-title">📖 Riwayat Siklus</div>${histHTML}<button class="btn btn-soft btn-block mt" data-a="open" data-k="period">+ Catat Awal Haid</button></div></div>`;
+    ${phaseGuide(st)}
+    <div class="card" style="--i:3"><div class="card-title">📖 Riwayat Siklus</div>${histHTML}<button class="btn btn-soft btn-block mt" data-a="open" data-k="period">+ Catat Awal Haid</button></div></div>`;
+}
+function phaseGuide(st) {
+  if (!st.configured) return '';
+  const c = st.cycle, now = CODE[c.phase];
+  const rows = ['m', 's', 'f', 'p', 'l'].filter((k) => c.ranges[k]).map((k) => {
+    const r = c.ranges[k], ph = PH[k];
+    return `<div class="guide-row${k === now ? ' now' : ''}" style="--phase:${ph.color}"><i class="gdot"></i><div><div class="gh"><b>${ph.name}</b><span>${fmtRange(r.start, r.end)}</span>${k === now ? '<em>sekarang</em>' : ''}</div><p>${ph.desc}</p></div></div>`;
+  }).join('');
+  return `<div class="card" style="--i:2"><div class="card-title">🧭 Keterangan Fase</div><p class="muted" style="margin:-4px 0 6px">Siklus berjalan: ${fmtRange(c.cycleStart, addDays(c.cycleStart, c.avg - 1))}</p>${rows}</div>`;
 }
 function dayInfoHTML(d) {
   const p = phaseOn(d), ph = p && PH[p];
-  return `<h3 style="--phase:${ph?.color ?? 'var(--rose-deep)'}">${ph ? `${ph.icon} ${ph.name}` : 'Tanpa prediksi'}</h3><p>${fmtLong(d)}${idx.dates.has(d) ? ' · ada catatan' : ''}</p>`;
+  return `<h3 style="--phase:${ph?.color ?? 'var(--rose-deep)'}">${ph ? `${ph.icon} ${ph.name}` : 'Tanpa prediksi'}</h3><p>${fmtLong(d)}${idx.dates.has(d) ? ' · ada catatan' : ''}</p>${ph ? `<p style="margin-top:8px">${ph.desc}</p>` : ''}`;
 }
 
 // ───────────── tampilan: Data ─────────────

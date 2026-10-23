@@ -47,6 +47,12 @@ export function createService({ repo, config = {}, now = () => Date.now() }) {
     const model = createCycleModel({ settings, history, lh, bbt }, today, symptoms[0]?.date ?? null);
     const phase = model.phaseOn(today) ?? 'safe';
     const info = model.infoOn(today);
+    // Rentang tiap fase pada siklus berjalan (untuk keterangan fase di kalender).
+    const ranges = {};
+    for (let d = model.active.start; d <= model.active.end; d = addDays(d, 1)) {
+      const code = PHASE_CODE[model.phaseOn(d) ?? 'safe'];
+      (ranges[code] ??= { start: d, end: d }).end = d;
+    }
     const phases = {};
     const ovulations = {};
     for (const [date, i] of model.map) { phases[date] = PHASE_CODE[i.phase]; ovulations[i.cycleStart] = i.ovulation; }
@@ -59,7 +65,7 @@ export function createService({ repo, config = {}, now = () => Date.now() }) {
         avg: model.avg, phase, cycleDay: info?.cycleDay ?? null, cycleStart: model.active.start,
         nextPeriod: model.nextPeriod, daysToPeriod: model.daysToPeriod,
         nextOvulation: model.nextOvulation, daysToOvulation: model.daysToOvulation,
-        phases, ovulations,
+        phases, ovulations, ranges,
       },
       narrative: buildNarrative({ phase, today, daysToPeriod: model.daysToPeriod, mode: settings.mode, pms: pmsOut, pregnancy }),
       pms: pmsOut,

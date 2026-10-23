@@ -50,3 +50,9 @@ test('CSS kalender: ruang untuk tanggal terpilih (tak terpotong) dan semua sel p
   assert.match(day, /background:/, '.day harus punya latar dasar');
   assert.match(css, /\.day\[data-p="s"\]\s*\{[^}]*background:/, 'fase folikular harus punya latar');
 });
+
+test('fmtRange: satu hari, satu bulan, lintas bulan', () => {
+  assert.equal(ui.fmtRange('2026-10-24', '2026-10-24'), '24 Okt');
+  assert.equal(ui.fmtRange('2026-10-13', '2026-10-17'), '13–17 Okt');
+  assert.equal(ui.fmtRange('2026-10-25', '2026-11-06'), '25 Okt – 6 Nov');
+});

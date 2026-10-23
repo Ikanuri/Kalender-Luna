@@ -1,5 +1,8 @@
 # Patch Notes
 
+## [0.8.0] - 2026-10-23
+Kalender kini punya keterangan tiap fase: kapan terjadinya di siklusmu dan apa artinya. Ketuk tanggal untuk melihat penjelasan fasenya.
+
 ## [0.7.1] - 2026-10-23
 Perbaikan tampilan kalender: tanggal yang dipilih tidak lagi terpotong, semua tanggal punya latar yang seragam, dan legenda lebih rapi.
 

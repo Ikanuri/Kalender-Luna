@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.0] - 2026-10-23
+### Ditambahkan
+- Mini App, tab Siklus: kartu **Keterangan Fase** (Haid, Folikular, Masa Subur, Ovulasi, Luteal) berisi rentang tanggal tiap fase pada siklus berjalan, penanda fase yang sedang berlangsung, dan penjelasan singkat. Penjelasan fase juga muncul di kartu info saat tanggal diketuk. Fase yang tak ada di siklus itu disembunyikan.
+- `getState` mengembalikan `cycle.ranges` (dihitung server dari peta fase; ikut bergeser bila ovulasi terdeteksi dari LH/BBT). Tes: rentang tidak tumpang tindih dan menutup seluruh siklus.
+
 ## [0.7.1] - 2026-10-23
 ### Diperbaiki
 - Mini App, kalender: tanggal yang diketuk terpotong di tepi atas/bawah (wadah `overflow:hidden` untuk animasi geser bulan memotong scale + cincin) → ruang disediakan lewat padding/margin negatif; terverifikasi di baris pertama/tengah/terakhir pada lebar 450 dan 390 px.

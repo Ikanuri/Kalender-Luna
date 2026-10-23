@@ -34,6 +34,12 @@ test('onboard → state lengkap dengan fase, prediksi, analisis, laporan', async
   assert.equal(s.cycle.nextOvulation.date, '2026-10-24'); assert.equal(s.cycle.nextOvulation.source, 'calendar');
   assert.equal(s.cycle.phases['2026-10-10'], 'm'); assert.equal(s.cycle.phases['2026-10-24'], 'p'); assert.equal(s.cycle.phases['2026-10-26'], 'l');
   assert.ok(Object.keys(s.cycle.phases).length >= 8 * 28);
+  // rentang tiap fase di siklus berjalan (10 Okt – 6 Nov): haid 10–14, folikular 15–18, subur 19–23, ovulasi 24, luteal 25 Okt–6 Nov
+  assert.deepEqual(s.cycle.ranges, {
+    m: { start: '2026-10-10', end: '2026-10-14' }, s: { start: '2026-10-15', end: '2026-10-18' },
+    f: { start: '2026-10-19', end: '2026-10-23' }, p: { start: '2026-10-24', end: '2026-10-24' },
+    l: { start: '2026-10-25', end: '2026-11-06' },
+  });
   assert.equal(s.data.history.length, 1);
   assert.match(s.report, /LAPORAN SIKLUS/); assert.match(s.share, /Haid berikutnya/);
   assert.equal(s.analysis, null); assert.equal(s.pregnancy, null);
@@ -156,4 +162,14 @@ test('runEndpoint: auth, pemetaan error aman, error internal dicatat tanpa data 
     (e) => /kode #1/.test(e.message) && e.parameters.code === 'INTERNAL' && !/secret/.test(e.message));
   const ev = (await repo.recentEvents('error'))[0];
   assert.equal(ev.label, 'api:act'); assert.equal(ev.userId, 7);
+});
+
+test('rentang fase mengikuti LH (ovulasi bergeser) dan tak pernah tumpang tindih', async () => {
+  const t = setup(); await onboard(t);
+  const s = await t.act({ type: 'lh', date: '2026-10-19', result: 'peak' }); // ovulasi 20 Okt
+  const r = s.cycle.ranges;
+  assert.equal(r.p.start, '2026-10-20'); assert.equal(r.f.end, '2026-10-19'); assert.equal(r.l.start, '2026-10-21');
+  const days = Object.values(r).flatMap((x) => { const out = []; for (let d = x.start; d <= x.end; d = new Date(Date.parse(d) + 864e5).toISOString().slice(0, 10)) out.push(d); return out; });
+  assert.equal(new Set(days).size, days.length, 'rentang fase tumpang tindih');
+  assert.equal(days.length, s.cycle.avg, 'rentang harus menutup seluruh siklus');
 });
