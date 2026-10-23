@@ -4,6 +4,6 @@ export default {
   // user_id Telegram yang boleh memicu /_cron (penyapu reminder harian).
   adminIds: [582589514],
   // Alamat Mini App (dicetak `tgcloud push`: https://app<id>.tgcloud.ai/). Dipakai tombol /app.
-  miniAppUrl: '',
+  miniAppUrl: 'https://app8956021829.tgcloud.ai/',
   defaultTzOffset: 420, // WIB, menit dari UTC
 };

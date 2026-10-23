@@ -1,5 +1,8 @@
 # Patch Notes
 
+## [0.5.1] - 2026-10-23
+Perintah /app kini menampilkan tombol untuk membuka Mini App Luna.
+
 ## [0.5.0] - 2026-10-23
 Mini App Luna: tampilan penuh dengan cincin fase, kalender berwarna, analisis, grafik suhu basal, dan semua pencatatan — terhubung langsung ke logika yang sama dengan bot. Buka lewat /app.
 
