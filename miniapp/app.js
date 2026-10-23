@@ -167,7 +167,7 @@ function todayRecord(st) {
 function viewToday() {
   const st = S.state;
   if (!st.configured) {
-    return `<div class="card"><div class="empty"><span class="big">🌸</span>Isi data siklusmu untuk melihat beranda, kalender berwarna, dan prediksi.</div><button class="btn btn-primary btn-block" data-a="setup">Isi Data Siklus</button></div>`;
+    return `<div class="card"><div class="greet" style="margin-top:0">${esc(st.greeting)}</div><div class="empty"><span class="big">🌸</span>Isi data siklusmu untuk melihat beranda, kalender berwarna, dan prediksi.</div><button class="btn btn-primary btn-block" data-a="setup">Isi Data Siklus</button></div>`;
   }
   const c = st.cycle, code = CODE[c.phase], ph = PH[code];
   let i = 0; const r = () => `style="--i:${i++}"`;
@@ -176,8 +176,9 @@ function viewToday() {
   const ins = st.insights.length ? `<div class="card" ${r()}><div class="card-title">💡 Insight</div>${st.insights.map((x) => `<p class="muted" style="color:var(--ink-mid);margin-bottom:8px">${esc(x)}</p>`).join('')}</div>` : '';
   return `<div class="rise" style="--phase:${ph.color}">
     <div ${r()}>${alertsHTML(st)}</div>
-    <div class="card hero" ${r()}><div class="ring-wrap">${ringSVG(c)}<div class="ring-center"><div class="ring-day" id="ringDay">0</div><div class="ring-lbl">Hari ke · ${c.avg} hari</div></div></div>
-      <div class="phase-pill">${ph.icon} ${ph.name}</div><p class="phase-desc">${ph.desc}</p></div>
+    <div class="card hero" ${r()}><div class="ring-wrap">${ringSVG(c)}<div class="ring-center"><div class="ring-lbl top">Hari ke</div><div class="ring-day" id="ringDay">0</div><div class="ring-lbl">dari ${c.avg} hari</div></div></div>
+      <div class="phase-pill">${ph.icon} ${ph.name}</div>
+      <div class="greet">${esc(st.greeting)}</div><p class="phase-desc">${esc(st.narrative)}</p></div>
     <div class="two" ${r()}>
       <div class="stat m"><div class="k">Haid berikutnya</div><div class="v">${c.daysToPeriod}<small style="font-size:.9rem"> hari</small></div><div class="s">${fmtDM(c.nextPeriod)}</div></div>
       <div class="stat p"><div class="k">Ovulasi</div><div class="v">${Math.max(0, c.daysToOvulation)}<small style="font-size:.9rem"> hari</small></div><div class="s">${fmtDM(c.nextOvulation.date)} · ${OV_SRC[c.nextOvulation.source]}</div></div></div>

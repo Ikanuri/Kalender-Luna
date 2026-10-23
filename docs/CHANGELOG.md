@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.0] - 2026-10-23
+### Diubah
+- Beranda Mini App: label "Hari ke" kini di atas angka (dan "dari N hari" di bawahnya).
+### Ditambahkan
+- Narasi hangat di bawah cincin siklus, singkat dan tanpa emoji, dengan sapaan sesuai jam dan nama akun Telegram ("Selamat pagi, Rina"). Dihasilkan server (`lib/narrative.js`, lewat `getState`) dan bergantung pada fase, haid yang dekat, mode program hamil, dan PMS berat; variasi tetap per hari. Nama hanya untuk tampilan — dibersihkan dan tidak disimpan. 5 tes baru (total 60).
+
 ## [0.5.2] - 2026-10-23
 ### Diperbaiki
 - Sheet/pop-up Mini App tidak bisa ditutup dengan geser ke bawah di layar sentuh: browser membatalkan pointer events saat sheet mulai di-scroll. Diganti touch events; gestur diambil alih hanya dari handle atau saat sheet di puncak dan ditarik ke bawah (scroll biasa tetap jalan), dengan flick cepat, snap-back, dan backdrop memudar. Area handle diperbesar. Tes `scripts/e2e-swipe.mjs`.

@@ -7,4 +7,4 @@ import { runEndpoint } from '../lib/endpoint.js';
 
 const svc = createService({ repo, config });
 
-export default (input, ctx) => runEndpoint({ EndpointError, repo, ctx, name: 'getState', fn: (uid) => svc.getState(uid) });
+export default (input, ctx) => runEndpoint({ EndpointError, repo, ctx, name: 'getState', fn: (uid, user) => svc.getState(uid, user) });

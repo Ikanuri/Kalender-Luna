@@ -10,6 +10,7 @@ import { monthlyInsights } from './insights.js';
 import { pregnancyStatus } from './pregnancy.js';
 import { buildDoctorReport } from './report.js';
 import { buildSharePayload, formatSharePayload } from './share.js';
+import { buildGreeting, buildNarrative } from './narrative.js';
 import { VERSION } from './version.js';
 
 export class ServiceError extends Error {
@@ -24,11 +25,14 @@ const configured = (s) => !!(s && s.lastPeriodDate && s.cycleLength && s.periodL
 export function createService({ repo, config = {}, now = () => Date.now() }) {
   const tzOf = (s) => s?.tzOffset ?? config.defaultTzOffset ?? 420;
 
-  async function getState(uid) {
+  const hourOf = (tz) => Math.floor((((now() + tz * 60000) % 86400000) + 86400000) % 86400000 / 3600000);
+
+  /** user = { name } dari initData Telegram (hanya untuk sapaan; tidak disimpan). */
+  async function getState(uid, user = {}) {
     const settings = await repo.getSettings(uid);
     const today = todayIn(tzOf(settings), now());
     const base = {
-      version: VERSION, today, tzOffset: tzOf(settings), onboarded: !!settings?.onboardedAt,
+      version: VERSION, today, greeting: buildGreeting({ name: user.name, hour: hourOf(tzOf(settings)) }), tzOffset: tzOf(settings), onboarded: !!settings?.onboardedAt,
       configured: configured(settings), mode: settings?.mode ?? 'normal',
       settings: settings ? { lastPeriodDate: settings.lastPeriodDate ?? null, cycleLength: settings.cycleLength ?? null, periodLength: settings.periodLength ?? null } : null,
       ranges: { cycleLength: RANGE.cycleLength, periodLength: RANGE.periodLength, bbt: RANGE.bbt },
@@ -47,6 +51,8 @@ export function createService({ repo, config = {}, now = () => Date.now() }) {
     const ovulations = {};
     for (const [date, i] of model.map) { phases[date] = PHASE_CODE[i.phase]; ovulations[i.cycleStart] = i.ovulation; }
     const pms = predictPMS(symptoms, model.phaseOn);
+    const pmsOut = pms ? { ...pms, show: shouldShowPMS(phase, model.daysToPeriod) } : null;
+    const pregnancy = settings.mode === 'pregnant' ? pregnancyStatus(model, today) : null;
     return {
       ...base, data,
       cycle: {
@@ -55,8 +61,9 @@ export function createService({ repo, config = {}, now = () => Date.now() }) {
         nextOvulation: model.nextOvulation, daysToOvulation: model.daysToOvulation,
         phases, ovulations,
       },
-      pms: pms ? { ...pms, show: shouldShowPMS(phase, model.daysToPeriod) } : null,
-      pregnancy: settings.mode === 'pregnant' ? pregnancyStatus(model, today) : null,
+      narrative: buildNarrative({ phase, today, daysToPeriod: model.daysToPeriod, mode: settings.mode, pms: pmsOut, pregnancy }),
+      pms: pmsOut,
+      pregnancy,
       analysis: (() => { const a = computeAnalysis(history); return a ? { avg: a.avg, min: a.min, max: a.max, std: a.std, regularity: a.regularity, lengths: a.lengths } : null; })(),
       compare: compareCycles(history),
       anomalies: detectAnomalies(history),
@@ -188,12 +195,12 @@ export function createService({ repo, config = {}, now = () => Date.now() }) {
   }
 
   /** Jalankan satu aksi tulis lalu kembalikan state terbaru (satu round-trip). */
-  async function act(uid, input) {
+  async function act(uid, input, user = {}) {
     const fn = handlers[input?.type];
     if (!fn) bad('Aksi tidak dikenal.', 'UNKNOWN_ACTION');
     const settings = await repo.getSettings(uid);
     await fn(uid, input, { settings, today: todayIn(tzOf(settings), now()) });
-    return getState(uid);
+    return getState(uid, user);
   }
 
   return { getState, act };

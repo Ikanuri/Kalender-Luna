@@ -74,8 +74,10 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 500; }
 .ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .ring-day { font-family: 'Fraunces', serif; font-size: 3.7rem; line-height: 1; font-weight: 300; color: var(--phase); }
 .ring-lbl { font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-light); margin-top: 6px; }
+.ring-lbl.top { margin: 0 0 2px; }
 .phase-pill { display: inline-flex; align-items: center; gap: 7px; margin-top: 16px; padding: 8px 16px; border-radius: 99px; background: color-mix(in srgb, var(--phase) 14%, transparent); color: var(--phase); font-weight: 700; font-size: .86rem; }
-.phase-desc { font-size: .84rem; color: var(--ink-mid); line-height: 1.6; margin-top: 10px; }
+.greet { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 300; font-size: 1.2rem; color: var(--phase, var(--rose-deep)); margin-top: 18px; }
+.phase-desc { font-size: .88rem; color: var(--ink-mid); line-height: 1.65; margin: 6px auto 0; max-width: 30ch; }
 
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
 .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px; box-shadow: var(--shadow-xs); }

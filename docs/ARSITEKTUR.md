@@ -73,3 +73,4 @@ key (dilarang runtime); `resetAll` menghapus semua tabel per `user_id`.
 - **Dev lokal**: `node scripts/dev-server.mjs` (layanan asli + repo in-memory; `SEED=1` untuk data contoh). `api.js` memakai `Serverless.call` di Telegram dan `fetch('/api/…')` di luar Telegram.
 - **Uji visual/alur**: `scripts/e2e-miniapp.mjs` (Chromium, lokal).
 - **Setelah deploy pertama**: salin alamat `https://app<id>.tgcloud.ai/` dari log `tgcloud push` ke `lib/config.js → miniAppUrl` (tombol `/app`) dan ke BotFather (Menu Button / Mini App).
+- **Narasi beranda**: `lib/narrative.js` (murni) menghasilkan `greeting` + `narrative`; `service.getState(uid, { name })` menerima nama dari `ctx.initData.user.first_name` (lewat `lib/endpoint.js`). Nama hanya dipakai untuk tampilan dan tidak disimpan. Salinan teks tinggal di server agar teruji dan UI tetap tanpa logika.

@@ -1,5 +1,8 @@
 # Patch Notes
 
+## [0.6.0] - 2026-10-23
+Beranda lebih hangat: sapaan dengan namamu dan satu-dua kalimat yang menyesuaikan fase siklusmu. Label "Hari ke" dipindah ke atas angka.
+
 ## [0.5.2] - 2026-10-23
 Pop-up di Mini App kini bisa ditutup dengan geser ke bawah (atau seret garis kecil di atasnya).
 

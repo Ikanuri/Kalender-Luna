@@ -8,7 +8,8 @@ export async function runEndpoint({ EndpointError, repo, ctx, name, fn }) {
   const uid = ctx?.initData?.user?.id;
   if (!Number.isInteger(uid)) throw new EndpointError('Tidak terautentikasi.', { code: 'UNAUTHORIZED' });
   try {
-    return await fn(uid);
+    const u = ctx.initData.user;
+    return await fn(uid, { name: u.first_name });
   } catch (e) {
     if (e instanceof ServiceError) throw new EndpointError(e.message, { code: e.code });
     const id = await recordError(repo, { source: 'endpoint', label: `api:${name}`, userId: uid }, e);

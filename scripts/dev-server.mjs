@@ -16,6 +16,7 @@ const repo = fakeRepo();
 const svc = createService({ repo, config: { defaultTzOffset: 420 }, now });
 class EndpointError extends Error { constructor(m, p) { super(m); this.parameters = p; } }
 const UID = 1;
+const USER = { name: process.env.DEV_NAME ?? 'Rina' }; // meniru first_name dari initData
 
 if (process.env.SEED) {
   const today = new Date(now() + 7 * 3600e3).toISOString().slice(0, 10);
@@ -39,10 +40,10 @@ http.createServer(async (req, res) => {
     if (req.method === 'POST' && req.url.startsWith('/api/')) {
       const name = req.url.slice(5);
       const body = JSON.parse(await new Promise((ok) => { let b = ''; req.on('data', (c) => (b += c)); req.on('end', () => ok(b || '{}')); }));
-      const fn = { getState: () => svc.getState(UID), act: () => svc.act(UID, body) }[name];
+      const fn = { getState: (uid, u) => svc.getState(uid, u), act: (uid, u) => svc.act(uid, body, u) }[name];
       res.setHeader('content-type', 'application/json');
       if (!fn) { res.statusCode = 404; return res.end('{"error":{"message":"endpoint tidak ada"}}'); }
-      try { return res.end(JSON.stringify({ result: await runEndpoint({ EndpointError, repo, ctx: { initData: { user: { id: UID } } }, name, fn }) })); }
+      try { return res.end(JSON.stringify({ result: await runEndpoint({ EndpointError, repo, ctx: { initData: { user: { id: UID, first_name: USER.name } } }, name, fn }) })); }
       catch (e) { res.statusCode = 400; return res.end(JSON.stringify({ error: { message: e.message, parameters: e.parameters } })); }
     }
     const path = normalize(req.url.split('?')[0]).replace(/^\/+/, '') || 'index.html';
