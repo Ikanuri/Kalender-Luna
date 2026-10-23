@@ -68,13 +68,41 @@ function closeSheet() {
 backdrop.addEventListener('click', closeSheet);
 document.addEventListener('keydown', (e) => e.key === 'Escape' && closeSheet());
 try { tg?.BackButton?.onClick(closeSheet); } catch {}
-// geser ke bawah untuk menutup
+// Geser ke bawah untuk menutup. Layar sentuh: pakai touch events (pointer events dibatalkan browser
+// begitu sheet mulai di-scroll). Gestur diambil alih hanya bila dimulai dari handle, atau sheet
+// sedang di paling atas dan ditarik ke bawah; selain itu scroll biasa tetap jalan.
 (() => {
-  let y0 = null, dy = 0;
-  sheet.addEventListener('pointerdown', (e) => { if (e.target.closest('.grab') || (sheet.scrollTop === 0 && !e.target.closest('input,textarea,button,pre'))) { y0 = e.clientY; dy = 0; } });
-  sheet.addEventListener('pointermove', (e) => { if (y0 == null) return; dy = Math.max(0, e.clientY - y0); if (dy > 4) { sheet.style.transition = 'none'; sheet.style.transform = `translateY(${dy}px)`; } });
-  const end = () => { if (y0 == null) return; sheet.style.transition = ''; sheet.style.transform = ''; if (dy > 110) closeSheet(); y0 = null; };
-  sheet.addEventListener('pointerup', end); sheet.addEventListener('pointercancel', end);
+  let y0 = null, t0 = 0, dy = 0, dragging = false, fromGrab = false;
+  const begin = (y, target) => { y0 = y; t0 = performance.now(); dy = 0; dragging = false; fromGrab = !!target.closest('.grab'); };
+  const move = (y, ev) => {
+    if (y0 == null) return;
+    const d = y - y0;
+    if (!dragging) {
+      if (d > 6 && (fromGrab || sheet.scrollTop <= 0)) { dragging = true; sheet.style.transition = 'none'; } else return;
+    }
+    dy = Math.max(0, d);
+    sheet.style.transform = `translateY(${dy}px)`;
+    backdrop.style.opacity = String(1 - Math.min(1, dy / 420));
+    ev?.preventDefault();
+  };
+  const end = () => {
+    if (y0 == null) return;
+    const wasDragging = dragging, quick = performance.now() - t0 < 260;
+    y0 = null; dragging = false;
+    if (!wasDragging) return;
+    sheet.style.transition = ''; backdrop.style.opacity = '';
+    const close = dy > 110 || (quick && dy > 40);
+    if (close) { haptic.light(); closeSheet(); }   // lanjut meluncur ke bawah dari posisi sekarang
+    sheet.style.transform = '';
+  };
+  const open = () => sheet.classList.contains('on');
+  sheet.addEventListener('touchstart', (e) => { if (open() && e.touches.length === 1) begin(e.touches[0].clientY, e.target); }, { passive: true });
+  sheet.addEventListener('touchmove', (e) => open() && move(e.touches[0].clientY, e), { passive: false });
+  sheet.addEventListener('touchend', end); sheet.addEventListener('touchcancel', end);
+  // mouse (Telegram Desktop/Web): seret handle
+  sheet.addEventListener('pointerdown', (e) => { if (e.pointerType === 'mouse' && e.target.closest('.grab')) { begin(e.clientY, e.target); sheet.setPointerCapture(e.pointerId); } });
+  sheet.addEventListener('pointermove', (e) => e.pointerType === 'mouse' && move(e.clientY));
+  sheet.addEventListener('pointerup', (e) => e.pointerType === 'mouse' && end());
 })();
 
 // ───────────── aksi tulis ─────────────

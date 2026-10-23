@@ -1,5 +1,8 @@
 # Patch Notes
 
+## [0.5.2] - 2026-10-23
+Pop-up di Mini App kini bisa ditutup dengan geser ke bawah (atau seret garis kecil di atasnya).
+
 ## [0.5.1] - 2026-10-23
 Perintah /app kini menampilkan tombol untuk membuka Mini App Luna.
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.5.2] - 2026-10-23
+### Diperbaiki
+- Sheet/pop-up Mini App tidak bisa ditutup dengan geser ke bawah di layar sentuh: browser membatalkan pointer events saat sheet mulai di-scroll. Diganti touch events; gestur diambil alih hanya dari handle atau saat sheet di puncak dan ditarik ke bawah (scroll biasa tetap jalan), dengan flick cepat, snap-back, dan backdrop memudar. Area handle diperbesar. Tes `scripts/e2e-swipe.mjs`.
+
 ## [0.5.1] - 2026-10-23
 ### Diubah
 - `miniAppUrl` diisi (`https://app8956021829.tgcloud.ai/`, terverifikasi: file statis 200 dengan header `no-cache`, API menolak tanpa autentikasi dengan 401) sehingga `/app` menampilkan tombol buka Mini App.
