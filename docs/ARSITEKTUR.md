@@ -64,3 +64,12 @@ key (dilarang runtime); `resetAll` menghapus semua tabel per `user_id`.
 - `.github/workflows/ci-cd.yml`: `npm test` → (main) `tgcloud push` → `migrate --safe` → smoke `endpoints/health`.
 - `.github/workflows/monitor.yml`: health check tiap 6 jam.
 - Error handling: `bot.js` membungkus `handleMessage`/`handleCallback` dengan `guarded()` → `diag.recordError` → tabel `diag_events`. Detail di `docs/DIAGNOSA.md`.
+
+## Mini App (`miniapp/`)
+
+- **Tanpa build.** Folder disajikan apa adanya oleh tgcloud (`tgcloud.jsonc` → `static.source`); `tgcloud push` mengunggah kode dan file statis sekaligus. Modul ES biasa: `index.html`, `style.css`, `app.js`, `util.js`, `api.js`.
+- **Server menghitung, UI merender.** `endpoints/getState` mengembalikan data + hasil hitungan (peta fase, prediksi, analisis, PMS, korelasi, laporan); `endpoints/act` menerima `{ type, ... }` untuk semua aksi tulis dan mengembalikan state terbaru. Keduanya tipis: `lib/endpoint.js` (otentikasi + pemetaan error) → `lib/service.js` (validasi + pemanggilan logika murni). `test/miniapp.test.js` menjaga UI tak memuat logika siklus.
+- **Identitas** dari `ctx.initData.user.id` (diverifikasi platform) — tidak ada PIN/login.
+- **Dev lokal**: `node scripts/dev-server.mjs` (layanan asli + repo in-memory; `SEED=1` untuk data contoh). `api.js` memakai `Serverless.call` di Telegram dan `fetch('/api/…')` di luar Telegram.
+- **Uji visual/alur**: `scripts/e2e-miniapp.mjs` (Chromium, lokal).
+- **Setelah deploy pertama**: salin alamat `https://app<id>.tgcloud.ai/` dari log `tgcloud push` ke `lib/config.js → miniAppUrl` (tombol `/app`) dan ke BotFather (Menu Button / Mini App).

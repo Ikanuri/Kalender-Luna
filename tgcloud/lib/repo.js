@@ -108,3 +108,16 @@ export async function allForAudit() {
     [T.settings, T.cycleHistory, T.symptoms, T.bbt, T.wellbeing, T.lh, T.kb, T.pregtest].map((t) => db.select().from(t).all()));
   return { settings, history, symptoms, bbt, wellbeing, lh, kb, preg };
 }
+
+// ───────────── Mini App ─────────────
+export const listWellbeing = (uid) => list(T.wellbeing, uid);
+export const listKB = (uid) => list(T.kb, uid);
+export const listPreg = (uid) => list(T.pregtest, uid);
+
+const KIND_TABLE = { symptom: T.symptoms, bbt: T.bbt, wellbeing: T.wellbeing, lh: T.lh, kb: T.kb, preg: T.pregtest, cycle: T.cycleHistory };
+/** Hapus satu entri milik pengguna: per tanggal (tabel unik) atau per id (kb/preg). */
+export async function deleteEntry(uid, kind, { date, id }) {
+  const t = KIND_TABLE[kind];
+  const where = (kind === 'kb' || kind === 'preg') ? and(byUser(t, uid), eq(t.id, id)) : and(byUser(t, uid), eq(t.date, date));
+  await db.delete(t).where(where).run();
+}

@@ -186,3 +186,13 @@ test('reminder: terkirim sekali per hari, hanya admin yang boleh /_cron', async 
   await t.say('/_cron', 1);
   assert.equal(t.api.calls.filter((c) => c.m === 'sendMessage' && /Haid besok/.test(c.p.text)).length, 1);
 });
+
+test('/app: tombol web_app bila URL dikonfigurasi, petunjuk bila belum', async () => {
+  const t = setup();
+  await t.say('/app');
+  assert.match(t.api.last('sendMessage').text, /belum diaktifkan/);
+  const t2 = setup({ miniAppUrl: 'https://app123.tgcloud.ai/' });
+  await t2.say('/app');
+  const btn = t2.api.last('sendMessage').reply_markup.inline_keyboard[0][0];
+  assert.deepEqual(btn.web_app, { url: 'https://app123.tgcloud.ai/' });
+});

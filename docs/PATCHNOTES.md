@@ -1,5 +1,8 @@
 # Patch Notes
 
+## [0.5.0] - 2026-10-23
+Mini App Luna: tampilan penuh dengan cincin fase, kalender berwarna, analisis, grafik suhu basal, dan semua pencatatan — terhubung langsung ke logika yang sama dengan bot. Buka lewat /app.
+
 ## [0.4.0] - 2026-10-22
 Kalender sekarang berupa tombol langsung di badan chat (bukan keyboard di bawah): merah=haid, hijau=masa subur, biru ⭐=ovulasi, 🟣=luteal.
 

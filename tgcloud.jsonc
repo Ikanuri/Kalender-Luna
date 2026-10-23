@@ -1,4 +1,9 @@
 {
-  // Konfigurasi proyek tgcloud. Mini App (opsional) belum dipakai —
-  // fitur kalender berjalan penuh lewat bot (PRD §14).
+  // Mini App: folder statis disajikan apa adanya (tanpa build) di https://app<id>.tgcloud.ai/
+  // dan memanggil endpoints/ lewat Telegram.WebApp.Serverless.call.
+  "static": {
+    "source": "miniapp",
+    // Tanpa build, file tak punya hash → paksa klien memeriksa versi terbaru tiap dibuka.
+    "headers": [{ "path": "/*", "set": { "Cache-Control": "no-cache", "Referrer-Policy": "no-referrer" } }]
+  }
 }

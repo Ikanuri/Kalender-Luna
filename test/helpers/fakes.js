@@ -1,7 +1,7 @@
 // Repo & API palsu in-memory untuk menguji alur bot end-to-end.
 const NOW_FAKE = Date.UTC(2026, 9, 20, 3, 0);
 export function fakeRepo() {
-  const db = { settings: new Map(), history: [], symptoms: [], bbt: [], wellbeing: [], lh: [], kb: [], preg: [], conv: new Map() };
+  const db = { seq: 0, settings: new Map(), history: [], symptoms: [], bbt: [], wellbeing: [], lh: [], kb: [], preg: [], conv: new Map() };
   const sortD = (a) => [...a].sort((x, y) => (x.date < y.date ? -1 : 1));
   const mine = (arr, uid) => sortD(arr.filter((r) => r.userId === uid));
   const upsert = (arr, uid, date, v) => {
@@ -22,8 +22,15 @@ export function fakeRepo() {
     upsertBBT: async (uid, d, t) => upsert(db.bbt, uid, d, { tempCelsius: t }),
     upsertWellbeing: async (uid, d, v) => upsert(db.wellbeing, uid, d, v),
     upsertLH: async (uid, d, r) => upsert(db.lh, uid, d, { result: r }),
-    addKB: async (uid, date, type, status) => db.kb.push({ userId: uid, date, type, status }),
-    addPreg: async (uid, date, result) => db.preg.push({ userId: uid, date, result }),
+    addKB: async (uid, date, type, status) => db.kb.push({ id: ++db.seq, userId: uid, date, type, status }),
+    addPreg: async (uid, date, result) => db.preg.push({ id: ++db.seq, userId: uid, date, result }),
+    listWellbeing: async (uid) => mine(db.wellbeing, uid),
+    listKB: async (uid) => mine(db.kb, uid),
+    listPreg: async (uid) => mine(db.preg, uid),
+    deleteEntry: async (uid, kind, { date, id }) => {
+      const key = { symptom: 'symptoms', bbt: 'bbt', wellbeing: 'wellbeing', lh: 'lh', kb: 'kb', preg: 'preg', cycle: 'history' }[kind];
+      db[key] = db[key].filter((r) => !(r.userId === uid && (kind === 'kb' || kind === 'preg' ? r.id === id : r.date === date)));
+    },
     dayRows: async (uid, date) => {
       const at = (a) => a.filter((r) => r.userId === uid && r.date === date);
       return {

@@ -20,3 +20,5 @@
 4. Kirim /start ke bot di Telegram.
 
 **Bug CLI yang diketahui:** `@tgcloud/cli` 0.2.0 kadang crash di `writeSnapshotFile` setelah push sukses (isi modul `false` dari server). Dilaporkan perlu ke tim tgcloud; workflow sudah menoleransinya (lihat `ci-cd.yml`). Bila muncul lagi di komputer lokal: `npx tgcloud fetch` lalu `status`.
+
+**Mini App:** diuji di Chromium lokal dengan layanan asli (14 skenario alur + screenshot), **belum** di klien Telegram sungguhan. Yang perlu dicek di ponsel: tampilan di dalam Telegram (tema, safe area, header), `BackButton`, haptic, dan `Serverless.call`. Isi `miniAppUrl` setelah deploy.

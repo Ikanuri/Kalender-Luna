@@ -18,6 +18,7 @@ import { callbackLabel, diagAudit, diagErrorDetail, diagSelfTest, diagSummary, r
 import defaultConfig from './config.js';
 
 const HELP = `<b>Luna — perintah</b>
+/app — buka Mini App Luna (tampilan penuh)
 /kalender [YYYY-MM] — kalender berwarna, tap tanggal untuk detail
 /status — fase hari ini, prediksi haid & ovulasi
 /haid [tanggal] — catat hari pertama haid
@@ -108,6 +109,9 @@ export function createBot({ api, repo, config = defaultConfig, now = () => Date.
       await repo.setConv(uid, ob.state);
       return html(chat, ob.reply.text, ob.reply.keyboard);
     },
+    app: ({ chat }) => (config.miniAppUrl
+      ? html(chat, '🌙 Buka Luna dengan tampilan penuh: kalender, grafik, dan analisis.', [[{ text: 'Buka Luna', web_app: { url: config.miniAppUrl } }]])
+      : html(chat, 'Mini App belum diaktifkan. Gunakan /kalender dan /status dulu ya.')),
     bantuan: ({ chat }) => html(chat, HELP),
     help: ({ chat }) => html(chat, HELP),
 

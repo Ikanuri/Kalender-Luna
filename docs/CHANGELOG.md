@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0] - 2026-10-23
+### Ditambahkan
+- **Mini App** (`miniapp/`, tanpa build): UI bergaya Luna v7.1 dengan animasi halus — onboarding 3 langkah, Hari Ini (cincin fase animasi, peringatan, prediksi, PMS, mode hamil), Siklus (kalender berwarna + sheet detail tanggal + riwayat), Data (analisis, log gejala, wellbeing, tracker BBT/LH/KB/test pack), Lainnya (pengaturan, zona waktu, tema, laporan dokter, berbagi, reset).
+- `lib/service.js` (getState/act): seluruh logika dari `tgcloud/lib` disajikan ke UI; UI tidak punya algoritma siklus. Endpoint `getState` dan `act` (otentikasi initData), pembungkus `lib/endpoint.js` dengan pencatatan error tanpa data pengguna.
+- Perintah `/app` (tombol `web_app`), konfigurasi `miniAppUrl`; `tgcloud.jsonc` mendaftarkan folder statis + header `no-cache`.
+- `scripts/dev-server.mjs` (server dev dengan layanan asli) dan `scripts/e2e-miniapp.mjs` (uji Chromium lokal); tes Mini App; total 55 tes.
+
 ## [0.4.0] - 2026-10-22
 ### Diubah
 - Kalender kembali ke **tombol di badan pesan** (rich message `<tg-button-row>`/`<tg-button>`), bukan inline keyboard: warna fase lewat `style` (merah/hijau/biru), header hari tombol nonaktif, navigasi & detail tanggal mengedit pesan yang sama.
