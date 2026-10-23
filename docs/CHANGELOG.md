@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.7.0] - 2026-10-23
+### Ditambahkan
+- Reminder harian otomatis: `.github/workflows/reminders.yml` (01:07 UTC = 08:07 WIB; `workflow_dispatch` dengan opsi dry-run) memanggil `endpoints/cron` lewat `tgcloud run`. Endpoint khusus admin (`lib/cron.js`) dengan dry-run, shard (`user_id % of`), dan `previousRun` sebagai bukti catatan DB bertahan. Biaya Actions ≈30 menit/bulan, tidak naik menurut jumlah pengguna. 7 tes baru (total 67).
+### Diubah
+- `runReminders` mendukung `dry`/`shard` dan melaporkan `due`. Monitor kesehatan dikurangi dari tiap 6 jam menjadi harian (hemat menit Actions).
+
 ## [0.6.0] - 2026-10-23
 ### Diubah
 - Beranda Mini App: label "Hari ke" kini di atas angka (dan "dari N hari" di bawahnya).

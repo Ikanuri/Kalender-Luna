@@ -1,5 +1,8 @@
 # Patch Notes
 
+## [0.7.0] - 2026-10-23
+Pengingat siklus kini terkirim otomatis tiap pagi (08:07 WIB) lewat GitHub Actions: haid besok, ovulasi besok, dan masa subur.
+
 ## [0.6.0] - 2026-10-23
 Beranda lebih hangat: sapaan dengan namamu dan satu-dua kalimat yang menyesuaikan fase siklusmu. Label "Hari ke" dipindah ke atas angka.
 

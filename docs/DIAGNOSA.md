@@ -33,7 +33,7 @@ Perintah admin (diam untuk non-admin):
 `audit.js` memeriksa invarian data: nilai chip tak dikenal (drift string/emoji, jebakan §24.2), suhu di luar 35–38.5, skor wellbeing di luar 1–5, tanggal tak valid/masa depan, hasil LH/test/KB tak dikenal, pengaturan di luar rentang. Hanya mengembalikan jumlah dan nilai enum, bukan isi catatan.
 
 ## 5. Pemantauan terjadwal
-`monitor.yml` (tiap 6 jam) menjalankan health check; workflow merah → notifikasi GitHub. Reminder: `/diag` menampilkan kapan sapuan `/_cron` terakhir — jika “belum pernah” atau lama, pemicu eksternal mati.
+`monitor.yml` (harian 01:37 UTC) menjalankan health check; workflow merah → notifikasi GitHub. Reminder: `/diag` menampilkan kapan sapuan terakhir berjalan (dari `reminders.yml` atau `/_cron`) — jika “belum pernah” atau lebih dari ±1 hari, pemicu mati; cek tab Actions → Reminders.
 
 ## Alur investigasi bug
 1. Pengguna lapor / notifikasi 🚨 → `/diag error <id>` (label + stack).

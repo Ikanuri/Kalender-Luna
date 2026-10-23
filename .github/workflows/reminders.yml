@@ -1,0 +1,55 @@
+name: Reminders
+
+# Sapuan reminder harian (PRD §18). tgcloud tidak punya cron bawaan, jadi jadwal ada di sini:
+# memanggil endpoints/cron di platform lewat CLI (token yang sama dengan deploy).
+# 01:07 UTC = 08:07 WIB. Satu job ~1 menit/hari, biayanya TIDAK naik menurut jumlah pengguna.
+# Pengiriman maksimal sekali sehari per pengguna (dijaga di server), jadi aman bila dijalankan ulang.
+on:
+  schedule:
+    - cron: '7 1 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Uji saja: hitung yang jatuh tempo tanpa mengirim pesan'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reminders
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TGCLOUD_TOKEN: ${{ secrets.TGCLOUD_TOKEN }}
+      SHARDS: '1'   # naikkan bila pengguna sudah ribuan (membagi sapuan per user_id % SHARDS)
+      DRY: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Sapuan reminder
+        run: |
+          set -o pipefail
+          [ -n "$TGCLOUD_TOKEN" ] || { echo "::error::Secret TGCLOUD_TOKEN kosong"; exit 1; }
+          ADMIN=$(node -e "import('./tgcloud/lib/config.js').then(m => console.log(m.default.adminIds[0] ?? ''))")
+          [ -n "$ADMIN" ] || { echo "::error::adminIds kosong di tgcloud/lib/config.js"; exit 1; }
+          echo "### Sapuan reminder (dry=$DRY, shards=$SHARDS)" >> "$GITHUB_STEP_SUMMARY"
+          for i in $(seq 0 $((SHARDS - 1))); do
+            npx tgcloud run endpoints/cron "{ dry: $DRY, shard: $i, of: $SHARDS }" \
+              --ctx "{ initData: { user: { id: $ADMIN } } }" | tee "out.$i"
+            grep -Eq 'users: *[0-9]+' "out.$i" || { echo "::error::Keluaran sapuan tak dikenali (shard $i)"; exit 1; }
+            line=$(grep -E 'users: *[0-9]+' "out.$i" | head -1)
+            echo "- shard $i: \`$line\`" >> "$GITHUB_STEP_SUMMARY"
+            failed=$(echo "$line" | grep -oE 'failed: *[0-9]+' | grep -oE '[0-9]+' || echo 0)
+            [ "${failed:-0}" -eq 0 ] || echo "::warning::$failed pengiriman gagal di shard $i (mis. bot diblokir pengguna); dicoba lagi besok"
+          done

@@ -37,15 +37,25 @@ memakai repo/API palsu (`test/helpers/fakes.js`) — tanpa Telegram, tanpa DB.
 | Privasi | hanya chat pribadi; Mode Berbagi = `/bagikan` menghasilkan teks fase+prediksi saja untuk di-forward manual | PRD §19 |
 | Reminder | tgcloud tidak punya cron terdokumentasi → sapuan dipicu `/_cron` oleh `config.adminIds` | lihat di bawah |
 
-## Reminder (§18) — ketergantungan eksternal
+## Reminder (§18) — dipicu GitHub Action
 
-Dokumentasi Telegram Serverless (dicek 2026-10-22) hanya punya `handlers/` dan
-`endpoints/`; tidak ada scheduled trigger. `decideReminder` (logika) dan
-`runReminders` (sapuan: baca semua `settings` terkonfigurasi, hitung hari-ini per zona
-waktu, kirim, catat `lastReminderDate`) sudah ada dan diuji. Yang **belum** ada adalah
-pemicu berkala: isi `config.adminIds` lalu jadwalkan pengiriman pesan `/_cron` dari akun
-admin tiap pagi (mis. skrip userbot dengan cron). Alternatif bila Telegram menambah cron
-bawaan: panggil `runReminders` dari sana.
+Dokumentasi Telegram Serverless (dicek 2026-10-22) tidak punya cron/scheduled trigger; hanya
+`handlers/` dan `endpoints/`. Maka jadwal ada di luar, dan sengaja memakai pintu yang sudah ada:
+
+```
+GitHub Action reminders.yml (01:07 UTC = 08:07 WIB)
+  └─ npx tgcloud run endpoints/cron '{ dry, shard, of }'     (token yang sama dengan deploy)
+       └─ lib/endpoint.js (otentikasi) → lib/cron.js (hanya adminIds) → lib/reminder-runner.js
+            └─ untuk tiap pengguna terkonfigurasi: hari-ini menurut zona waktunya → decideReminder
+               → sendMessage → simpan lastReminderDate (maks 1×/hari/pengguna)
+```
+
+- **Biaya Actions** ±1 menit/hari (≈30 menit/bulan) dan **tidak naik menurut jumlah pengguna**: satu job menyapu semua orang.
+- **Aman diulang**: `lastReminderDate` mencegah ganda; pengguna yang gagal (bot diblokir) tidak ditandai sehingga dicoba lagi besok, tanpa menghentikan yang lain.
+- **dry-run** (`workflow_dispatch`, default *true*): menghitung yang jatuh tempo tanpa mengirim. Dipakai untuk uji dan untuk melihat jumlah penerima.
+- **shard**: `SHARDS` di workflow membagi sapuan per `user_id % SHARDS` bila pengguna sudah ribuan (waktu eksekusi runtime tak terdokumentasi).
+- **Bukti berjalan**: tiap sapuan mencatat event `cron` (juga dry) dan mengembalikan `previousRun`; `/diag` menampilkan "Reminder terakhir".
+- `/_cron` (admin) tetap ada sebagai pemicu manual dari chat.
 
 ## Skema data
 

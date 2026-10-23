@@ -24,3 +24,5 @@
 **Mini App:** diuji di Chromium lokal dengan layanan asli (14 skenario alur + screenshot), **belum** di klien Telegram sungguhan. Yang perlu dicek di ponsel: tampilan di dalam Telegram (tema, safe area, header), `BackButton`, haptic, dan `Serverless.call`. Isi `miniAppUrl` setelah deploy.
 
 **Alamat Mini App (terdeploy):** `https://app8956021829.tgcloud.ai/` (`miniAppUrl` sudah diisi). Tersisa di sisi BotFather: pasang alamat yang sama sebagai Menu Button / Mini App agar tombol “Open” muncul di chat (tidak bisa dilakukan dari kode).
+
+**Reminder:** `reminders.yml` menjadwalkan sapuan harian. Verifikasi pertama lewat Actions → Reminders → Run workflow (dry_run default true), lalu jalankan sekali dengan dry_run=false. Asumsi yang perlu dibuktikan: `tgcloud run` benar-benar mengirim pesan & menulis DB (bukan simulasi) — `previousRun` pada sapuan kedua dan `/diag` membuktikannya.

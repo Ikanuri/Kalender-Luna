@@ -82,7 +82,7 @@ reproduksi yang sensitif:
   netral, atau `detectBBTOvulation` dari nol.
 - **Scheduling/reminder (PRD.md §18)**: sudah dikonfirmasi (2026-10-22) bahwa
   dokumentasi `tgcloud` tidak punya cron bawaan. Penyapu reminder dipicu
-  eksternal lewat `/_cron` (admin) — lihat `docs/ARSITEKTUR.md`. Cek ulang
+  GitHub Action terjadwal (`reminders.yml` → `endpoints/cron`; `/_cron` = manual) — lihat `docs/ARSITEKTUR.md`. Cek ulang
   dokumentasi `tgcloud` bila ingin mengganti mekanisme ini.
 - **Arsitektur & dokumentasi wajib** ada di `docs/` (ARSITEKTUR, CHANGELOG,
   PATCHNOTES, HANDOFF, PLAN; sesuai Aturan Wajib #3 root `html5-project`).

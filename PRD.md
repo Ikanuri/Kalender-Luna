@@ -850,7 +850,7 @@ FUNGSI tentukanReminderHariIni(user):
 Urutan pengecekan ini penting — hanya **1 reminder per hari** per user,
 kondisi pertama yang cocok yang menang.
 
-**Catatan implementasi — DIKONFIRMASI 2026-10-22:** dokumentasi resmi Telegram Serverless (halaman `bots/serverless`) tidak memuat cron/scheduled trigger; hanya `handlers/` (update Telegram) dan `endpoints/` (Mini App). Karena itu penyapu reminder dipicu eksternal lewat perintah admin `/_cron` (lihat `docs/ARSITEKTUR.md`). Catatan semula: dokumentasi `tgcloud` yang tersedia saat ini hanya
+**Catatan implementasi — DIKONFIRMASI 2026-10-22:** dokumentasi resmi Telegram Serverless (halaman `bots/serverless`) tidak memuat cron/scheduled trigger; hanya `handlers/` (update Telegram) dan `endpoints/` (Mini App). Karena itu penyapu reminder dipicu eksternal: GitHub Action terjadwal memanggil `endpoints/cron` lewat CLI (`/_cron` tetap ada sebagai pemicu manual admin) — lihat `docs/ARSITEKTUR.md`. Catatan semula: dokumentasi `tgcloud` yang tersedia saat ini hanya
 menjelaskan `handlers/` (reaksi ke update Telegram) dan `endpoints/`
 (dipanggil dari Mini App) — keduanya **event-driven**, bukan time-driven.
 Belum jelas apakah `tgcloud` punya mekanisme cron/scheduled trigger bawaan
